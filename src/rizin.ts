@@ -35,10 +35,10 @@ function getFilePE() {
     return fileInput;
 }
 
-function getDecompiledFunction(func: RizinFunction, session: number, cmd: (session: number, command: string) => string) {
+async function getDecompiledFunction(func: RizinFunction, session: number, cmd: (session: number, command: string) => string, counter: { value: number }) {
     const pdfj = JSON.parse(cmd(session,`pdfj @ ${func.offset}`)) as PdfjResponse;
 
-    let asm : string = "";
+    let asm : string = `${func.name} (${func.offset.toString(16)})\n`;
 
     if (pdfj.ops) {
         for (const op of pdfj.ops) {
@@ -51,14 +51,18 @@ function getDecompiledFunction(func: RizinFunction, session: number, cmd: (sessi
         }
     }
 
-    console.log(asm);
+    const remaining = --counter.value;
+
+    console.log(`[${remaining} of ${counter.value}] ${asm}`);
 }
 
-function getDecompiledFunctions(funcs: RizinFunction[], session: number, cmd: (session: number, command: string) => string) {
-    
+async function getDecompiledFunctions(funcs: RizinFunction[], session: number, cmd: (session: number, command: string) => string) {
+
+    const counter = { value: funcs.length };
+
     for (const func of funcs) {
         try {
-            getDecompiledFunction(func, session, cmd);
+            await getDecompiledFunction(func, session, cmd, counter);
         } catch (err) {
             console.error(func, err);
         }
@@ -129,7 +133,7 @@ Module.onRuntimeInitialized = () => {
 
             const funcs = JSON.parse(cmd(session, "aflj")) as RizinFunction[];
 
-            getDecompiledFunctions(funcs, session, cmd);
+            await getDecompiledFunctions(funcs, session, cmd);
 
             console.log("Analisis terminado");
         }
