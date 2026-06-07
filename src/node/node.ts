@@ -113,6 +113,14 @@ export class Node {
 
     draw(): void {
         this.container = document.getElementById(DRAWFLOW_ID) as HTMLElement;
+
+        this._commentInputController?.abort();
+        this.container.innerHTML = "";
+        this.offsetToNodeId.clear();
+        this.instrToPort.clear();
+        this.instrByOffset.clear();
+        this.nodePortToOffset.clear();
+
         this.editor = new Drawflow(this.container);
         this.editor.start();
         (this.editor as any).removeNodeId = () => {};

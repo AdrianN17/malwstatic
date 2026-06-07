@@ -4,10 +4,15 @@ import { initRizin } from "./rizin";
 import { Documentation } from "./documentation/documentation";
 import { Node} from "./node/node";
 import { DecompiledPEReader } from "./structure/decompiledReader";
+import { Utils } from "./utils";
+
+const RELOAD_TIMEOUT = 5000;
 
 initRizin((pe, filename) => {
     const yaml = ExportYAML.export(pe);
     ExportYAML.download(`${filename}.yaml`, yaml);
+    Utils.showToast("✓ Extracted with Rizin");
+    setTimeout(() => location.reload(), RELOAD_TIMEOUT);
 });
 
 let currentDecompiled: DecompiledPEReader | null = null;
@@ -21,13 +26,15 @@ peCommentEl.addEventListener("input", () => {
 });
 
 async function loadYAML(file: File, handle: unknown = null): Promise<void> {
-    // Reset bar with no transition so the sweep starts from 0
-    const bar = document.getElementById("loadBar") as HTMLElement;
-    bar.style.width = "0%";
+    node = null;
+    documentation = null;
+    currentDecompiled = null;
+    fileHandle = null;
+    peCommentEl.textContent = "";
 
     fileHandle = handle;
 
-    const text = await file.text();   // suspends here → browser repaints at 0%
+    const text = await file.text();
     const decompiled = ImportYAML.import(text);
     currentDecompiled = decompiled;
     peCommentEl.textContent = decompiled.comment ?? "";
@@ -39,12 +46,6 @@ async function loadYAML(file: File, handle: unknown = null): Promise<void> {
     documentation = new Documentation(decompiled);
     node = new Node(documentation);
     node.draw();
-
-    // Animate bar to loaded fraction
-    const pct = decompiled.maxFunctions > 0
-        ? Math.round(decompiled.functions.length / decompiled.maxFunctions * 100)
-        : 100;
-    bar.style.width = `${pct}%`;
 }
 
 document.getElementById("yamlBtn")!.addEventListener("click", async () => {
@@ -70,7 +71,7 @@ async function saveYAML(): Promise<void> {
     if (fileHandle) {
         try {
             await ExportYAML.saveToHandle(fileHandle, yaml);
-            showToast("✓ Saved");
+            Utils.showToast("✓ Saved");
             return;
         } catch {
         }
@@ -78,14 +79,7 @@ async function saveYAML(): Promise<void> {
 
     const name = (document.getElementById("yamlFileName") as HTMLElement).textContent || "output.yaml";
     ExportYAML.download(name, yaml);
-    showToast("✓ Downloaded");
-}
-
-function showToast(msg: string): void {
-    const el = document.getElementById("saveToast") as HTMLElement;
-    el.textContent = msg;
-    el.classList.add("show");
-    setTimeout(() => el.classList.remove("show"), 2200);
+    Utils.showToast("✓ Downloaded");
 }
 
 document.addEventListener("keydown", (e: KeyboardEvent) => {

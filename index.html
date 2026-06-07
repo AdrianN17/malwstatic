@@ -222,21 +222,6 @@
         pointer-events: none;
       }
 
-      /* ── Load progress bar ── */
-      .load-bar-track {
-        height: 3px;
-        background: #3e3d32;
-        flex-shrink: 0;
-        width: 100%;
-      }
-      .load-bar {
-        height: 100%;
-        width: 0%;
-        background: #a6e22e;
-        transition: width 0.55s cubic-bezier(0.25, 1, 0.5, 1);
-        box-shadow: 0 0 6px rgba(166, 226, 46, 0.5);
-      }
-
       .toast {
         position: fixed;
         bottom: 24px;
@@ -312,16 +297,6 @@
 
     <div id="drawflow"></div>
 
-    <div class="load-bar-track"><div class="load-bar" id="loadBar"></div></div>
-
-    <script>
-        document.getElementById('pefileInput').addEventListener('change', function() {
-            const span = document.getElementById('pefileName');
-            const name = this.files?.[0]?.name ?? 'No file chosen';
-            span.textContent = name;
-            span.classList.toggle('chosen', !!this.files?.[0]);
-        });
-    </script>
     <div id="saveToast" class="toast"></div>
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>
     <script type="module" src="./dist/init.js"></script>
