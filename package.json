@@ -12,5 +12,10 @@
   "dependencies": {
     "drawflow": "^0.0.60",
     "yaml": "^2.9.0"
+  },
+  "scripts": {
+    "dev": "bun build ./src/init.ts --outfile ./dist/init.js --watch",
+    "build": "bun run build.ts",
+    "clean": "rm -rf dist build .tsbuildinfo"
   }
 }
