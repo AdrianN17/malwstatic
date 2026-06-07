@@ -102,6 +102,11 @@
       }
       .drawflow .drawflow-node .input { left: -23px; top: 2px; background: #3a3a7a }
       .drawflow .drawflow-node .output { right: 1px; top: 2px }
+      .drawflow .drawflow-node .input.used,
+      .drawflow .drawflow-node .output.used {
+        background: #e94560;
+        border-color: #c0304a;
+      }
       .drawflow .drawflow-node .input:hover,
       .drawflow .drawflow-node .output:hover {
         background: #7c5cfc;
@@ -131,6 +136,40 @@
       .drawflow .connection .point:hover { fill: #7c5cfc; stroke: #7c5cfc }
       .drawflow .main-path { fill: none; stroke-width: 3px; stroke: #4a4a9a }
 
+      .toolbar-sep {
+        width: 1px;
+        background: #2a2a5a;
+        align-self: stretch;
+        margin: 0 4px;
+      }
+
+      .app-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #c8c8e8;
+        letter-spacing: 0.04em;
+        padding-right: 8px;
+        border-right: 1px solid #2a2a5a;
+        margin-right: 4px;
+      }
+
+      .file-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .file-name {
+        font-size: 12px;
+        color: #5a5a8a;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-name.chosen { color: #9a9acc; }
+
       .drawflow-delete { display: none !important; }
       .drawflow-delete {
         position: absolute;
@@ -156,17 +195,40 @@
 </head>
 <body>
 
-    <h1>Malwstatic</h1>
+    <div class="toolbar">
+        <span class="app-title">Malwstatic</span>
 
-    <label for="pefileInput">Choose a PE binary</label>
+        <span class="file-label">
+            <label class="but" for="pefileInput">PE Binary</label>
+            <span class="file-name" id="pefileName">No file chosen</span>
+        </span>
+        <input type="file" id="pefileInput" name="pefileInput" accept=".exe" hidden />
 
-    <input type="file" id="pefileInput" name="pefileInput" accept=".exe" />
+        <div class="toolbar-sep"></div>
 
-    <label for="yamlFileInput">Choose a YAML file</label>
+        <span class="file-label">
+            <label class="but" for="yamlFileInput">YAML File</label>
+            <span class="file-name" id="yamlFileName">No file chosen</span>
+        </span>
+        <input type="file" id="yamlFileInput" name="yamlFileInput" accept=".yaml" hidden />
+    </div>
 
-    <input type="file" id="yamlFileInput" name="yamlFileInput" accept=".yaml" />
     <div id="drawflow"></div>
 
+    <script>
+        document.getElementById('pefileInput').addEventListener('change', function() {
+            const span = document.getElementById('pefileName');
+            const name = this.files?.[0]?.name ?? 'No file chosen';
+            span.textContent = name;
+            span.classList.toggle('chosen', !!this.files?.[0]);
+        });
+        document.getElementById('yamlFileInput').addEventListener('change', function() {
+            const span = document.getElementById('yamlFileName');
+            const name = this.files?.[0]?.name ?? 'No file chosen';
+            span.textContent = name;
+            span.classList.toggle('chosen', !!this.files?.[0]);
+        });
+    </script>
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>
     <script type="module" src="./dist/init.js"></script>
 </body>

@@ -1,8 +1,33 @@
+export class Reference {
+
+    offsetA: string;
+    offsetB: string;
+
+    constructor(offsetA: string, offsetB: string) {
+        this.offsetA = offsetA.toLowerCase();
+        this.offsetB = offsetB.toLowerCase();
+    }
+
+    involves(offset: string): boolean {
+        const o = offset.toLowerCase();
+        return this.offsetA === o || this.offsetB === o;
+    }
+
+    otherEnd(offset: string): string | null {
+        const o = offset.toLowerCase();
+        if (this.offsetA === o) return this.offsetB;
+        if (this.offsetB === o) return this.offsetA;
+        return null;
+    }
+
+}
+
 export class DecompiledPE {
     
     functions : FunctionDecompiled[];
     maxFunctions : number;
     count : number;
+    references : Reference[] = [];
 
     constructor(maxFunctions : number) {
         this.functions = [];
@@ -27,10 +52,17 @@ export class DecompiledPE {
                 const match = instr.opcode.match(/^call\s+(0x)?([0-9a-fA-F]+)/);
                 if (match) {
                     const target = match[2].toLowerCase();
-                    if (allOffsets.has(target)) instr.addReference(target);
+                    if (allOffsets.has(target)) {
+                        instr.addReference(target);
+                        this.references.push(new Reference(instr.offset, target));
+                    }
                 }
             })
         );
+    }
+
+    public findReferences(offset: string): Reference[] {
+        return this.references.filter(r => r.involves(offset));
     }
 
 }

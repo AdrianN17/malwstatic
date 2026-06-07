@@ -1,4 +1,4 @@
-import { DecompiledPE, FunctionDecompiled, InstructionDecompiled } from "./decompiledPE";
+import { DecompiledPE, FunctionDecompiled, InstructionDecompiled, Reference } from "./decompiledPE";
 
 export class DecompiledPEReader extends DecompiledPE {
 
@@ -27,6 +27,17 @@ export class FunctionDecompiledReader extends FunctionDecompiled {
     constructor(name : string, offset : string, comments : string = "") {
         super(name, offset);
         this.comments = comments;
+    }
+
+}
+
+export class ReferenceReader extends Reference {
+
+    comment : string;
+
+    constructor(offsetA : string, offsetB : string, comment : string = "") {
+        super(offsetA, offsetB);
+        this.comment = comment;
     }
 
 }

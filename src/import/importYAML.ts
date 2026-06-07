@@ -1,4 +1,4 @@
-import { DecompiledPEReader, FunctionDecompiledReader, InstructionDecompiledReader } from "../structure/decompiledReader";
+import { DecompiledPEReader, FunctionDecompiledReader, InstructionDecompiledReader, ReferenceReader } from "../structure/decompiledReader";
 import YAML from 'yaml';
 
 export class ImportYAML {
@@ -13,6 +13,10 @@ export class ImportYAML {
                 fn.Instructions.push(new InstructionDecompiledReader(instr.offset ?? "", instr.opcode ?? "", instr.comment ?? ""));
             }
             decompiledPE.add(fn);
+        }
+
+        for (const ref of parsed.references ?? []) {
+            decompiledPE.references.push(new ReferenceReader(ref.offsetA ?? "", ref.offsetB ?? "", ref.comment ?? ""));
         }
 
         return decompiledPE;

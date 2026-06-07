@@ -10,6 +10,8 @@ initRizin((pe, filename) => {
     ExportYAML.download(`${filename}.yaml`, yaml);
 });
 
+let node: Node | null = null;
+
 const yamlFileInput = document.getElementById("yamlFileInput") as HTMLInputElement;
 yamlFileInput.addEventListener("change", async (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -18,6 +20,14 @@ yamlFileInput.addEventListener("change", async (e: Event) => {
     const text = await file.text();
     const decompiled = ImportYAML.import(text);
     const documentation = new Documentation(decompiled);
-    const node = new Node(documentation);
+    node = new Node(documentation);
     node.draw();
+});
+
+document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.ctrlKey && e.key === "s") {
+        e.preventDefault();
+        if (!node) return;
+        console.log(node);
+    }
 });
