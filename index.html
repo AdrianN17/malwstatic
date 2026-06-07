@@ -8,8 +8,8 @@
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
-        background: #0d0d1a;
-        color: #c8c8d8;
+        background: #272822;
+        color: #f8f8f2;
         font-family: 'Segoe UI', system-ui, sans-serif;
         display: flex;
         flex-direction: column;
@@ -21,17 +21,18 @@
         display: flex;
         gap: 8px;
         padding: 10px 16px;
-        background: #12122a;
-        border-bottom: 1px solid #1e1e40;
+        background: #1e1f1c;
+        border-bottom: 1px solid #49483e;
         flex-shrink: 0;
+        align-items: center;
       }
 
       .but {
         padding: 6px 14px;
-        background: #1a1a3a;
-        border: 1px solid #2e2e5e;
+        background: #2d2e2a;
+        border: 1px solid #49483e;
         border-radius: 6px;
-        color: #a0a0c8;
+        color: #75715e;
         cursor: pointer;
         font-size: 13px;
         transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -39,23 +40,23 @@
       }
 
       .but:hover {
-        background: #2a2a5a;
-        border-color: #6060c0;
-        color: #e0e0ff;
+        background: #3e3d32;
+        border-color: #ae81ff;
+        color: #f8f8f2;
       }
 
       .but:active {
-        background: #3a3a7a;
+        background: #49483e;
       }
 
       #drawflow {
         flex: 1;
         position: relative;
         width: 100%;
-        background: #0d0d1a;
+        background: #272822;
         background-image:
-          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+          linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
         background-size: 24px 24px;
       }
 
@@ -68,12 +69,12 @@
         display: flex;
         align-items: center;
         position: absolute;
-        background: #151530;
+        background: #2d2e2a;
         width: 320px;
         min-height: 44px;
         border-radius: 10px;
-        border: 1px solid #2a2a5a;
-        color: #c8c8e8;
+        border: 1px solid #49483e;
+        color: #f8f8f2;
         z-index: 2;
         padding: 12px 14px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -81,10 +82,10 @@
         font-size: 13px;
       }
       .drawflow .drawflow-node.selected {
-        border-color: #7c5cfc;
-        box-shadow: 0 0 0 2px rgba(124,92,252,0.35), 0 4px 20px rgba(0,0,0,0.5);
+        border-color: #a6e22e;
+        box-shadow: 0 0 0 2px rgba(166,226,46,0.25), 0 4px 20px rgba(0,0,0,0.5);
       }
-      .drawflow .drawflow-node:hover { cursor: move; border-color: #4a4a8a }
+      .drawflow .drawflow-node:hover { cursor: move; border-color: #75715e }
       .drawflow .drawflow-node .inputs, .drawflow .drawflow-node .outputs { width: 0 }
       .drawflow .drawflow-node .drawflow_content_node { width: 100%; display: block }
 
@@ -92,25 +93,25 @@
         position: relative;
         width: 14px;
         height: 14px;
-        background: #1e1e42;
+        background: #272822;
         border-radius: 50%;
-        border: 2px solid #4a4a9a;
+        border: 2px solid #75715e;
         cursor: crosshair;
         z-index: 1;
         margin-bottom: 5px;
         transition: background 0.15s, border-color 0.15s, transform 0.15s;
       }
-      .drawflow .drawflow-node .input { left: -23px; top: 2px; background: #3a3a7a }
+      .drawflow .drawflow-node .input { left: -23px; top: 2px; background: #3e3d32 }
       .drawflow .drawflow-node .output { right: 1px; top: 2px }
       .drawflow .drawflow-node .input.used,
       .drawflow .drawflow-node .output.used {
-        background: #e94560;
-        border-color: #c0304a;
+        background: #f92672;
+        border-color: #c4134f;
       }
       .drawflow .drawflow-node .input:hover,
       .drawflow .drawflow-node .output:hover {
-        background: #7c5cfc;
-        border-color: #7c5cfc;
+        background: #ae81ff;
+        border-color: #ae81ff;
         transform: scale(1.3);
       }
 
@@ -119,26 +120,26 @@
       .drawflow .connection .main-path {
         fill: none;
         stroke-width: 3px;
-        stroke: #4a4a9a;
+        stroke: #ae81ff;
         pointer-events: all;
         transition: stroke 0.2s;
       }
-      .drawflow .connection .main-path:hover { stroke: #7c5cfc; cursor: pointer }
-      .drawflow .connection .main-path.selected { stroke: #7c5cfc }
+      .drawflow .connection .main-path:hover { stroke: #a6e22e; cursor: pointer }
+      .drawflow .connection .main-path.selected { stroke: #a6e22e }
       .drawflow .connection .point {
         cursor: move;
-        stroke: #4a4a9a;
+        stroke: #ae81ff;
         stroke-width: 2;
-        fill: #151530;
+        fill: #2d2e2a;
         pointer-events: all;
       }
       .drawflow .connection .point.selected,
-      .drawflow .connection .point:hover { fill: #7c5cfc; stroke: #7c5cfc }
-      .drawflow .main-path { fill: none; stroke-width: 3px; stroke: #4a4a9a }
+      .drawflow .connection .point:hover { fill: #a6e22e; stroke: #a6e22e }
+      .drawflow .main-path { fill: none; stroke-width: 3px; stroke: #ae81ff }
 
       .toolbar-sep {
         width: 1px;
-        background: #2a2a5a;
+        background: #49483e;
         align-self: stretch;
         margin: 0 4px;
       }
@@ -146,10 +147,10 @@
       .app-title {
         font-size: 15px;
         font-weight: 700;
-        color: #c8c8e8;
+        color: #a6e22e;
         letter-spacing: 0.04em;
         padding-right: 8px;
-        border-right: 1px solid #2a2a5a;
+        border-right: 1px solid #49483e;
         margin-right: 4px;
       }
 
@@ -161,14 +162,103 @@
 
       .file-name {
         font-size: 12px;
-        color: #5a5a8a;
+        color: #75715e;
         max-width: 160px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
-      .file-name.chosen { color: #9a9acc; }
+      .file-name.chosen { color: #f8f8f2; }
+
+      /* ── Comment styles ── */
+      .instr-comment, .func-comment {
+        flex: 1;
+        color: #e6db74;
+        font-style: italic;
+        outline: none;
+        white-space: nowrap;
+        overflow: hidden;
+        min-width: 4px;
+      }
+      .instr-comment:empty::before,
+      .func-comment:empty::before {
+        content: '; …';
+        color: rgba(230, 219, 116, 0.2);
+        pointer-events: none;
+        font-style: italic;
+      }
+      .ref-comment {
+        color: #e6db74;
+        font-size: 11px;
+        font-style: italic;
+        background: rgba(39, 40, 34, 0.9);
+        padding: 1px 6px;
+        border-radius: 3px;
+        outline: none;
+        white-space: nowrap;
+        overflow: hidden;
+        display: block;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+      }
+      .ref-comment:empty::before {
+        content: '; …';
+        color: rgba(230, 219, 116, 0.2);
+        pointer-events: none;
+      }
+      .pe-comment {
+        color: #e6db74;
+        font-style: italic;
+        font-size: 13px;
+        outline: none;
+        min-width: 80px;
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .pe-comment:empty::before {
+        content: 'PE comment…';
+        color: rgba(230, 219, 116, 0.2);
+        pointer-events: none;
+      }
+
+      /* ── Load progress bar ── */
+      .load-bar-track {
+        height: 3px;
+        background: #3e3d32;
+        flex-shrink: 0;
+        width: 100%;
+      }
+      .load-bar {
+        height: 100%;
+        width: 0%;
+        background: #a6e22e;
+        transition: width 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+        box-shadow: 0 0 6px rgba(166, 226, 46, 0.5);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #2d2e2a;
+        border: 1px solid #a6e22e;
+        color: #a6e22e;
+        padding: 8px 18px;
+        border-radius: 6px;
+        font-size: 13px;
+        z-index: 10000;
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
 
       .drawflow-delete { display: none !important; }
       .drawflow-delete {
@@ -178,7 +268,7 @@
         justify-content: center;
         width: 22px;
         height: 22px;
-        background: #e94560;
+        background: #f92672;
         color: #fff;
         z-index: 4;
         border: none;
@@ -187,7 +277,7 @@
         font-family: monospace;
         cursor: pointer;
         font-size: 14px;
-        box-shadow: 0 2px 8px rgba(233,69,96,0.5);
+        box-shadow: 0 2px 8px rgba(249,38,114,0.5);
       }
       .drawflow > .drawflow-delete { margin-left: -11px; margin-top: 11px }
       .parent-node .drawflow-delete { right: -11px; top: -11px }
@@ -207,13 +297,22 @@
         <div class="toolbar-sep"></div>
 
         <span class="file-label">
-            <label class="but" for="yamlFileInput">YAML File</label>
+            <button class="but" id="yamlBtn">YAML File</button>
             <span class="file-name" id="yamlFileName">No file chosen</span>
         </span>
         <input type="file" id="yamlFileInput" name="yamlFileInput" accept=".yaml" hidden />
+
+        <div class="toolbar-sep"></div>
+
+        <span class="file-label">
+            <span style="color:#75715e;font-size:12px;flex-shrink:0;">PE:</span>
+            <span id="peComment" contenteditable="true" class="pe-comment"></span>
+        </span>
     </div>
 
     <div id="drawflow"></div>
+
+    <div class="load-bar-track"><div class="load-bar" id="loadBar"></div></div>
 
     <script>
         document.getElementById('pefileInput').addEventListener('change', function() {
@@ -222,13 +321,8 @@
             span.textContent = name;
             span.classList.toggle('chosen', !!this.files?.[0]);
         });
-        document.getElementById('yamlFileInput').addEventListener('change', function() {
-            const span = document.getElementById('yamlFileName');
-            const name = this.files?.[0]?.name ?? 'No file chosen';
-            span.textContent = name;
-            span.classList.toggle('chosen', !!this.files?.[0]);
-        });
     </script>
+    <div id="saveToast" class="toast"></div>
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>
     <script type="module" src="./dist/init.js"></script>
 </body>

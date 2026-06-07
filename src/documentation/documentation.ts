@@ -17,5 +17,4 @@ export class Documentation {
     get() : DecompiledPEReader {
         return this.decompiledPEDraft;
     }
-
 }

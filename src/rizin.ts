@@ -143,8 +143,6 @@ export function initRizin(onAnalyzed: (pe: DecompiledPE, filename: string) => vo
                 const pe = await getDecompiledFunctions(funcs, session, cmd);
 
                 onAnalyzed(pe, file.name);
-
-                console.log("Analisis terminado");
             }
         );
     };
