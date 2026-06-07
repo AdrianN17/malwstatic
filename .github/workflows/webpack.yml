@@ -1,0 +1,41 @@
+ name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Malwstatic ${{ github.ref_name }}"
+          body: |
+            ## Malwstatic ${{ github.ref_name }}
+
+            Single-file release — download `index.html` and open it in any browser (no server required).
+
+            > **Note:** requires an internet connection on first load to fetch the Rizin WASM engine.
+          files: dist/index.html
+          fail_on_unmatched_files: true
