@@ -1,17 +1,15 @@
 {
   "name": "malwstatic",
   "module": "index.ts",
-  "type": "module",
-  "private": true,
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"
   },
+  "private": true,
+  "type": "module",
   "dependencies": {
-    "rete": "^2.0.6",
-    "rete-area-plugin": "^2.1.5",
-    "rete-connection-plugin": "^2.0.5"
+    "drawflow": "^0.0.60"
   }
 }

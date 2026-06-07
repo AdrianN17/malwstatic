@@ -2,7 +2,156 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi App</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #0d0d1a;
+        color: #c8c8d8;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #12122a;
+        border-bottom: 1px solid #1e1e40;
+        flex-shrink: 0;
+      }
+
+      .but {
+        padding: 6px 14px;
+        background: #1a1a3a;
+        border: 1px solid #2e2e5e;
+        border-radius: 6px;
+        color: #a0a0c8;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        user-select: none;
+      }
+
+      .but:hover {
+        background: #2a2a5a;
+        border-color: #6060c0;
+        color: #e0e0ff;
+      }
+
+      .but:active {
+        background: #3a3a7a;
+      }
+
+      #drawflow {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        background: #0d0d1a;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+
+      /* ── Drawflow node & connection styles ── */
+      .drawflow, .drawflow .parent-node { position: relative }
+      .parent-drawflow { display: flex; overflow: hidden; touch-action: none; outline: 0 }
+      .drawflow { width: 100%; height: 100%; user-select: none; perspective: 0 }
+
+      .drawflow .drawflow-node {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        background: #151530;
+        width: 190px;
+        min-height: 44px;
+        border-radius: 10px;
+        border: 1px solid #2a2a5a;
+        color: #c8c8e8;
+        z-index: 2;
+        padding: 12px 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        font-size: 13px;
+      }
+      .drawflow .drawflow-node.selected {
+        border-color: #7c5cfc;
+        box-shadow: 0 0 0 2px rgba(124,92,252,0.35), 0 4px 20px rgba(0,0,0,0.5);
+      }
+      .drawflow .drawflow-node:hover { cursor: move; border-color: #4a4a8a }
+      .drawflow .drawflow-node .inputs, .drawflow .drawflow-node .outputs { width: 0 }
+      .drawflow .drawflow-node .drawflow_content_node { width: 100%; display: block }
+
+      .drawflow .drawflow-node .input, .drawflow .drawflow-node .output {
+        position: relative;
+        width: 14px;
+        height: 14px;
+        background: #1e1e42;
+        border-radius: 50%;
+        border: 2px solid #4a4a9a;
+        cursor: crosshair;
+        z-index: 1;
+        margin-bottom: 5px;
+        transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      }
+      .drawflow .drawflow-node .input { left: -23px; top: 2px; background: #3a3a7a }
+      .drawflow .drawflow-node .output { right: 1px; top: 2px }
+      .drawflow .drawflow-node .input:hover,
+      .drawflow .drawflow-node .output:hover {
+        background: #7c5cfc;
+        border-color: #7c5cfc;
+        transform: scale(1.3);
+      }
+
+      .drawflow svg { z-index: 0; position: absolute; overflow: visible !important }
+      .drawflow .connection { position: absolute; pointer-events: none; aspect-ratio: 1/1 }
+      .drawflow .connection .main-path {
+        fill: none;
+        stroke-width: 3px;
+        stroke: #4a4a9a;
+        pointer-events: all;
+        transition: stroke 0.2s;
+      }
+      .drawflow .connection .main-path:hover { stroke: #7c5cfc; cursor: pointer }
+      .drawflow .connection .main-path.selected { stroke: #7c5cfc }
+      .drawflow .connection .point {
+        cursor: move;
+        stroke: #4a4a9a;
+        stroke-width: 2;
+        fill: #151530;
+        pointer-events: all;
+      }
+      .drawflow .connection .point.selected,
+      .drawflow .connection .point:hover { fill: #7c5cfc; stroke: #7c5cfc }
+      .drawflow .main-path { fill: none; stroke-width: 3px; stroke: #4a4a9a }
+
+      .drawflow-delete {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        background: #e94560;
+        color: #fff;
+        z-index: 4;
+        border: none;
+        font-weight: 700;
+        border-radius: 50%;
+        font-family: monospace;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(233,69,96,0.5);
+      }
+      .drawflow > .drawflow-delete { margin-left: -11px; margin-top: 11px }
+      .parent-node .drawflow-delete { right: -11px; top: -11px }
+    </style>
 </head>
 <body>
 
@@ -11,9 +160,9 @@
     <label for="pefileInput">Choose a PE binary</label>
 
     <input type="file" id="pefileInput" name="pefileInput" accept=".exe" />
+    <div id="drawflow"></div>
 
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>
-    <script type="module" src="./dist/app.js"></script>
     <script type="module" src="./dist/rizin.js"></script>
 </body>
 </html>

@@ -1,3 +1,6 @@
+import { DecompiledPE, FunctionDecompiled, InstructionDecompiled } from "./structure/decompiledPE.js";
+import { ExportYAML } from "./export/exportYAML.js";
+
 declare const Module: {
     onRuntimeInitialized: () => void;
 
@@ -35,43 +38,49 @@ function getFilePE() {
     return fileInput;
 }
 
-async function getDecompiledFunction(func: RizinFunction, session: number, cmd: (session: number, command: string) => string, counter: { value: number }) {
+async function getDecompiledFunction(func: RizinFunction, 
+    session: number, 
+    cmd: (session: number, command: string) => string, 
+    decompiledPE: DecompiledPE) {
     const pdfj = JSON.parse(cmd(session,`pdfj @ ${func.offset}`)) as PdfjResponse;
 
-    let asm : string = `${func.name} (${func.offset.toString(16)})\n`;
+    let functionStore = new FunctionDecompiled(func.name, func.offset.toString(16));
 
     if (pdfj.ops) {
-        for (const op of pdfj.ops) {
+        pdfj.ops.forEach(op => {
 
-            const offset = op.offset.toString(16);
+            const offset : string = op.offset.toString(16);
+            const opcode : string = op.opcode ?? "";
 
-            const opcode = op.opcode ?? "";
-
-            asm += `${offset} : ${opcode}\n`;
-        }
+            functionStore.add(new InstructionDecompiled(offset, opcode));
+        });
     }
 
-    const remaining = --counter.value;
-
-    console.log(`[${remaining} of ${counter.value}] ${asm}`);
+    decompiledPE.add(functionStore);
 }
 
-async function getDecompiledFunctions(funcs: RizinFunction[], session: number, cmd: (session: number, command: string) => string) {
+async function getDecompiledFunctions(
+    funcs: RizinFunction[], 
+    session: number, 
+    cmd: (session: number, command: string) => string,
+    filename: string) {
 
-    const counter = { value: funcs.length };
+    let decompiledPE : DecompiledPE = new DecompiledPE(funcs.length );
 
     for (const func of funcs) {
         try {
-            await getDecompiledFunction(func, session, cmd, counter);
+            await getDecompiledFunction(func, session, cmd, decompiledPE);
         } catch (err) {
             console.error(func, err);
         }
     }
+
+    const yaml = ExportYAML.export(decompiledPE);
+    console.log("downlaoding yaml...");
+    ExportYAML.download(`${filename}.yaml`, yaml);
 }
 
 Module.onRuntimeInitialized = () => {
-
-    console.log("Rizin WASM loaded");
 
      const createSession = Module.cwrap(
         "rzweb_create_session",
@@ -133,7 +142,7 @@ Module.onRuntimeInitialized = () => {
 
             const funcs = JSON.parse(cmd(session, "aflj")) as RizinFunction[];
 
-            await getDecompiledFunctions(funcs, session, cmd);
+            await getDecompiledFunctions(funcs, session, cmd, file.name);
 
             console.log("Analisis terminado");
         }
