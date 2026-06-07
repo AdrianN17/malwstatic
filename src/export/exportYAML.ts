@@ -1,20 +1,10 @@
-import { DecompiledPE } from "../structure/decompiledPE.js";
+import { DecompiledPE } from "../structure/decompiledPE";
+import YAML from 'yaml';
 
 export class ExportYAML {
     public static export(decompiledPE: DecompiledPE): string {
-        let yaml = "functions:\n";
 
-        for (const func of decompiledPE.functions) {
-            yaml += `  - name: ${func.name}\n`;
-            yaml += `    offset: "${func.offset}"\n`;
-            yaml += `    instructions:\n`;
-
-            func.Instructions.forEach(instr => {
-                yaml += `      - offset: "${instr.offset}"\n`;
-                yaml += `        opcode: "${instr.opcode}"\n`;
-            });
-        }
-
+        const yaml = YAML.stringify(decompiledPE);
         return yaml;
     }
 

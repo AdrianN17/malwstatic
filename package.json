@@ -10,6 +10,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "drawflow": "^0.0.60"
+    "drawflow": "^0.0.60",
+    "yaml": "^2.9.0"
   }
 }

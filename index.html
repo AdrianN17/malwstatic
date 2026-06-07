@@ -69,7 +69,7 @@
         align-items: center;
         position: absolute;
         background: #151530;
-        width: 190px;
+        width: 320px;
         min-height: 44px;
         border-radius: 10px;
         border: 1px solid #2a2a5a;
@@ -131,6 +131,7 @@
       .drawflow .connection .point:hover { fill: #7c5cfc; stroke: #7c5cfc }
       .drawflow .main-path { fill: none; stroke-width: 3px; stroke: #4a4a9a }
 
+      .drawflow-delete { display: none !important; }
       .drawflow-delete {
         position: absolute;
         display: flex;
@@ -160,9 +161,13 @@
     <label for="pefileInput">Choose a PE binary</label>
 
     <input type="file" id="pefileInput" name="pefileInput" accept=".exe" />
+
+    <label for="yamlFileInput">Choose a YAML file</label>
+
+    <input type="file" id="yamlFileInput" name="yamlFileInput" accept=".yaml" />
     <div id="drawflow"></div>
 
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>
-    <script type="module" src="./dist/rizin.js"></script>
+    <script type="module" src="./dist/init.js"></script>
 </body>
 </html>

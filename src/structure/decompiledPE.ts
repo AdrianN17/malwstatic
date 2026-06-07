@@ -15,16 +15,39 @@ export class DecompiledPE {
         this.count--;
     }
 
+    public calculateReference() {
+        const allOffsets = new Set<string>(
+            this.functions.flatMap(func =>
+                func.Instructions.map(instr => instr.offset.toLowerCase())
+            )
+        );
+
+        this.functions.forEach(func =>
+            func.Instructions.forEach(instr => {
+                const match = instr.opcode.match(/^call\s+(0x)?([0-9a-fA-F]+)/);
+                if (match) {
+                    const target = match[2].toLowerCase();
+                    if (allOffsets.has(target)) instr.addReference(target);
+                }
+            })
+        );
+    }
+
 }
 
 export class InstructionDecompiled {
 
     offset : string;
     opcode : string;
+    reference: string | null = null;
 
     constructor(offset : string, opcode : string) {
         this.offset = offset;
         this.opcode = opcode;
+    }
+
+    addReference(ref: string) {
+        this.reference = ref;
     }
 
 }

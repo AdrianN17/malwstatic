@@ -1,5 +1,4 @@
-import { DecompiledPE, FunctionDecompiled, InstructionDecompiled } from "./structure/decompiledPE.js";
-import { ExportYAML } from "./export/exportYAML.js";
+import { DecompiledPE, FunctionDecompiled, InstructionDecompiled } from "./structure/decompiledPE";
 
 declare const Module: {
     onRuntimeInitialized: () => void;
@@ -62,10 +61,9 @@ async function getDecompiledFunction(func: RizinFunction,
 async function getDecompiledFunctions(
     funcs: RizinFunction[], 
     session: number, 
-    cmd: (session: number, command: string) => string,
-    filename: string) {
+    cmd: (session: number, command: string) => string): Promise<DecompiledPE> {
 
-    let decompiledPE : DecompiledPE = new DecompiledPE(funcs.length );
+    const decompiledPE: DecompiledPE = new DecompiledPE(funcs.length);
 
     for (const func of funcs) {
         try {
@@ -75,76 +73,79 @@ async function getDecompiledFunctions(
         }
     }
 
-    const yaml = ExportYAML.export(decompiledPE);
-    console.log("downlaoding yaml...");
-    ExportYAML.download(`${filename}.yaml`, yaml);
+    decompiledPE.calculateReference();
+
+    return decompiledPE;
 }
 
-Module.onRuntimeInitialized = () => {
+export function initRizin(onAnalyzed: (pe: DecompiledPE, filename: string) => void): void {
+    Module.onRuntimeInitialized = () => {
 
-     const createSession = Module.cwrap(
-        "rzweb_create_session",
-        "number",
-        []) as () => number;
-
-    const openFile = Module.cwrap(
-        "rzweb_open_file",
-        "number",
-        [
+        const createSession = Module.cwrap(
+            "rzweb_create_session",
             "number",
+            []) as () => number;
+
+        const openFile = Module.cwrap(
+            "rzweb_open_file",
+            "number",
+            [
+                "number",
+                "string",
+                "number",
+                "number"
+            ]
+        ) as (
+            session: number,
+            path: string,
+            baseAddr: number,
+            writable: number) => number;
+
+        const cmd = Module.cwrap(
+            "rzweb_cmd",
             "string",
-            "number",
-            "number"
-        ]
-    ) as (
-        session: number,
-        path: string,
-        baseAddr: number,
-        writable: number) => number;
+            [
+                "number",
+                "string"
+            ]
+        ) as (
+            session: number,
+            command: string) => string;
 
-    const cmd = Module.cwrap(
-        "rzweb_cmd",
-        "string",
-        [
-            "number",
-            "string"
-        ]
-    ) as (
-        session: number,
-        command: string) => string;
+        getFilePE().addEventListener(
+            "change",
+            async (e: Event) => {
 
+                const target = e.target as HTMLInputElement;
+                const file = target.files?.[0];
 
-       getFilePE().addEventListener(
-        "change",
-        async (e: Event) => {
+                if (!file) return;
 
-            const target = e.target as HTMLInputElement;
-            const file = target.files?.[0];
+                const bytes = new Uint8Array(await file.arrayBuffer());
 
-            if (!file) return;
+                try {
+                    Module.FS.mkdir("/work");
+                } catch {
+                }
 
-            const bytes = new Uint8Array(await file.arrayBuffer());
+                const path = `/work/${file.name}`;
 
-            try {
-                Module.FS.mkdir("/work");
-            } catch {
+                Module.FS.writeFile(path, bytes);
+
+                const session = createSession();
+
+                openFile(session, path, 0, 1);
+
+                cmd(session, "aaa");
+
+                const funcs = JSON.parse(cmd(session, "aflj")) as RizinFunction[];
+
+                const pe = await getDecompiledFunctions(funcs, session, cmd);
+
+                onAnalyzed(pe, file.name);
+
+                console.log("Analisis terminado");
             }
-
-            const path = `/work/${file.name}`;
-
-            Module.FS.writeFile(path,bytes);
-
-            const session = createSession();
-
-            openFile(session, path, 0, 1);
-
-            cmd(session, "aaa");
-
-            const funcs = JSON.parse(cmd(session, "aflj")) as RizinFunction[];
-
-            await getDecompiledFunctions(funcs, session, cmd, file.name);
-
-            console.log("Analisis terminado");
-        }
-    );
-};
+        );
+    };
+}
