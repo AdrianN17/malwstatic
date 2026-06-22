@@ -1,9 +1,9 @@
-import { DecompiledPE } from "../structure/decompiledPE";
+import { Decompiled, Reference, Function, Instruction } from "../structure/decompiledGeneric";
 import YAML from 'yaml';
 
 export class ExportYAML {
-    public static export(decompiledPE: DecompiledPE): string {
-        return YAML.stringify(decompiledPE);
+    public static export(decompiled: Decompiled<Reference, Function<Instruction>>): string {
+        return YAML.stringify(decompiled);
     }
 
     public static download(filename: string, content: string): void {

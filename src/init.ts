@@ -3,7 +3,7 @@ import { ImportYAML } from "./import/importYAML";
 import { initRizin } from "./rizin";
 import { Documentation } from "./documentation/documentation";
 import { Node} from "./node/node";
-import { DecompiledPEReader } from "./structure/decompiledReader";
+import { DecompiledReader } from "./structure/decompiledReader";
 import { Utils } from "./utils";
 
 const RELOAD_TIMEOUT = 5000;
@@ -15,7 +15,7 @@ initRizin((pe, filename) => {
     setTimeout(() => location.reload(), RELOAD_TIMEOUT);
 });
 
-let currentDecompiled: DecompiledPEReader | null = null;
+let currentDecompiled: DecompiledReader | null = null;
 let fileHandle: any = null;
 let node: Node | null = null;
 let documentation: Documentation | null = null;

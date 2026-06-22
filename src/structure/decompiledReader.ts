@@ -1,16 +1,21 @@
-import { DecompiledPE, FunctionDecompiled, InstructionDecompiled, Reference } from "./decompiledPE";
+import { Reference, Function, Instruction, Decompiled } from "./decompiledGeneric";
 
-export class DecompiledPEReader extends DecompiledPE {
+export class ReferenceReader extends Reference {
 
-    comment : string;
+    comment: string;
 
-    constructor(maxFunctions : number, comment : string = "") {
-        super(maxFunctions);
+    constructor(
+        offsetA: string,
+        offsetB: string,
+        comment: string = ""
+    ) {
+        super(offsetA, offsetB);
         this.comment = comment;
     }
+
 }
 
-export class InstructionDecompiledReader extends InstructionDecompiled {
+export class InstructionReader extends Instruction {
 
     comment : string;
 
@@ -20,7 +25,7 @@ export class InstructionDecompiledReader extends InstructionDecompiled {
     }
 }
 
-export class FunctionDecompiledReader extends FunctionDecompiled {
+export class FunctionReader extends Function<InstructionReader> {
 
     comments : string;
 
@@ -31,13 +36,12 @@ export class FunctionDecompiledReader extends FunctionDecompiled {
 
 }
 
-export class ReferenceReader extends Reference {
+export class DecompiledReader extends Decompiled<ReferenceReader, FunctionReader> {
 
     comment : string;
 
-    constructor(offsetA : string, offsetB : string, comment : string = "") {
-        super(offsetA, offsetB);
+    constructor(comment : string = "") {
+        super();
         this.comment = comment;
     }
-
 }
