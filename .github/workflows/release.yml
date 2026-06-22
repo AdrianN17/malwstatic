@@ -1,4 +1,4 @@
-name: Build & Release
+name: Build, Release & Deploy Pages
 
 on:
   push:
@@ -7,10 +7,20 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -27,6 +37,11 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -39,3 +54,7 @@ jobs:
             > **Note:** requires an internet connection on first load to fetch the Rizin WASM engine.
           files: dist/index.html
           fail_on_unmatched_files: true
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
