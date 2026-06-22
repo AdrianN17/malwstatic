@@ -1,4 +1,4 @@
-import { DecompiledPE, FunctionDecompiled, InstructionDecompiled } from "./structure/decompiledPE";
+import { DecompiledWriter, FunctionWriter, InstructionWriter } from "./structure/decompiledWriter";
 
 declare const Module: {
     onRuntimeInitialized: () => void;
@@ -40,10 +40,10 @@ function getFilePE() {
 async function getDecompiledFunction(func: RizinFunction, 
     session: number, 
     cmd: (session: number, command: string) => string, 
-    decompiledPE: DecompiledPE) {
+    decompiledPE: DecompiledWriter) {
     const pdfj = JSON.parse(cmd(session,`pdfj @ ${func.offset}`)) as PdfjResponse;
 
-    let functionStore = new FunctionDecompiled(func.name, func.offset.toString(16));
+    let functionStore = new FunctionWriter(func.name, func.offset.toString(16));
 
     if (pdfj.ops) {
         pdfj.ops.forEach(op => {
@@ -51,7 +51,9 @@ async function getDecompiledFunction(func: RizinFunction,
             const offset : string = op.offset.toString(16);
             const opcode : string = op.opcode ?? "";
 
-            functionStore.add(new InstructionDecompiled(offset, opcode));
+            if (opcode.startsWith(";")) return;
+
+            functionStore.add(new InstructionWriter(offset, opcode));
         });
     }
 
@@ -61,9 +63,9 @@ async function getDecompiledFunction(func: RizinFunction,
 async function getDecompiledFunctions(
     funcs: RizinFunction[], 
     session: number, 
-    cmd: (session: number, command: string) => string): Promise<DecompiledPE> {
+    cmd: (session: number, command: string) => string): Promise<DecompiledWriter> {
 
-    const decompiledPE: DecompiledPE = new DecompiledPE(funcs.length);
+    const decompiledPE: DecompiledWriter = new DecompiledWriter(funcs.length);
 
     for (const func of funcs) {
         try {
@@ -78,7 +80,7 @@ async function getDecompiledFunctions(
     return decompiledPE;
 }
 
-export function initRizin(onAnalyzed: (pe: DecompiledPE, filename: string) => void): void {
+export function initRizin(onAnalyzed: (pe: DecompiledWriter, filename: string) => void): void {
     Module.onRuntimeInitialized = () => {
 
         const createSession = Module.cwrap(

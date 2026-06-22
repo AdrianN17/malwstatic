@@ -1,11 +1,11 @@
-import { DecompiledPEReader } from "../structure/decompiledReader";
+import { DecompiledReader } from "../structure/decompiledReader";
 
 export class Documentation {
 
-    decompiled: DecompiledPEReader;
-    decompiledPEDraft: DecompiledPEReader;
+    decompiled: DecompiledReader;
+    decompiledPEDraft: DecompiledReader;
 
-    constructor(decompiled: DecompiledPEReader) {
+    constructor(decompiled: DecompiledReader) {
         this.decompiled = decompiled;
         this.decompiledPEDraft = decompiled;
     }
@@ -14,7 +14,7 @@ export class Documentation {
         this.decompiled = this.decompiledPEDraft;
     }
 
-    get() : DecompiledPEReader {
+    get() : DecompiledReader {
         return this.decompiledPEDraft;
     }
 }
