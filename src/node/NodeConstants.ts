@@ -1,4 +1,4 @@
-export const NODE_W             = 360;
+export const NODE_W             = 600;
 export const NODE_GAP           = 40;
 export const ROW                = 19;
 export const NODE_PADDING       = 24;

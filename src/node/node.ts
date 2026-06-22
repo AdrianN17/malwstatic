@@ -81,7 +81,7 @@ export class Node {
         this.instrByOffset.clear();
         this.nodePortToOffset.clear();
 
-        const rowStyle = `height:${ROW}px;display:flex;align-items:center;box-sizing:border-box;gap:4px;overflow:hidden;`;
+        const rowStyle = `height:${ROW}px;display:flex;align-items:center;box-sizing:border-box;gap:4px;`;
 
         decompiled.functions.forEach(func => {
             const { x, y } = positions.get(func.offset.toLowerCase()) ?? { x: LAYOUT_ORIGIN_X, y: LAYOUT_ORIGIN_Y };
@@ -98,8 +98,8 @@ export class Node {
                 const comment = (instr as InstructionReader).comment ?? "";
                 return `<div style="${rowStyle}">` +
                     `<span style="flex-shrink:0;white-space:nowrap;color:#66d9ef;">${instr.offset}</span>` +
-                    `<span style="flex-shrink:0;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${highlightAsm(instr.opcode)}</span>` +
-                    `<span class="${CSS_INSTR_COMMENT}" contenteditable="true" data-offset="${instr.offset.toLowerCase()}">${comment}</span>` +
+                    `<span style="flex-shrink:0;white-space:nowrap;">${highlightAsm(instr.opcode)}</span>` +
+                    `<span class="${CSS_INSTR_COMMENT}" contenteditable="true" data-offset="${instr.offset.toLowerCase()}" style="min-width:80px;">${comment}</span>` +
                     `</div>`;
             }).join("");
 
