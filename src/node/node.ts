@@ -14,6 +14,7 @@ import {
 import { NodeLayout } from "./NodeLayout";
 import { ConnectionRenderer } from "./ConnectionRenderer";
 import { CommentController } from "./CommentController";
+import { highlightAsm } from "./asmHighlight";
 
 export class Node {
 
@@ -97,7 +98,7 @@ export class Node {
                 const comment = (instr as InstructionReader).comment ?? "";
                 return `<div style="${rowStyle}">` +
                     `<span style="flex-shrink:0;white-space:nowrap;color:#66d9ef;">${instr.offset}</span>` +
-                    `<span style="flex-shrink:0;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;color:#f8f8f2;">${instr.opcode}</span>` +
+                    `<span style="flex-shrink:0;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis;">${highlightAsm(instr.opcode)}</span>` +
                     `<span class="${CSS_INSTR_COMMENT}" contenteditable="true" data-offset="${instr.offset.toLowerCase()}">${comment}</span>` +
                     `</div>`;
             }).join("");
