@@ -12,7 +12,7 @@
   A browser-based static analysis tool for PE binaries — powered by <strong>Rizin WASM</strong> and a visual node editor.
 </p>
 
-![alt text](img/image2.png)
+![alt text](img/image.png)
 
 <p align="center">
   <a href="https://adriann17.github.io/malwstatic/>
