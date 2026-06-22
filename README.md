@@ -1,7 +1,7 @@
 # Malwstatic
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.1-a6e22e?style=for-the-badge" alt="version" />
+  <img src="https://img.shields.io/badge/version-0.0.4-a6e22e?style=for-the-badge" alt="version" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Bun-runtime-f9f1e1?style=for-the-badge&logo=bun&logoColor=black" alt="Bun" />
   <img src="https://img.shields.io/badge/Rizin-WASM-f92672?style=for-the-badge" alt="Rizin" />
