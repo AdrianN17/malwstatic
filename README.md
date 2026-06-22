@@ -1,7 +1,7 @@
 # Malwstatic
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.4-a6e22e?style=for-the-badge" alt="version" />
+  <img src="https://img.shields.io/badge/version-0.0.5-a6e22e?style=for-the-badge" alt="version" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Bun-runtime-f9f1e1?style=for-the-badge&logo=bun&logoColor=black" alt="Bun" />
   <img src="https://img.shields.io/badge/Rizin-WASM-f92672?style=for-the-badge" alt="Rizin" />
@@ -12,10 +12,10 @@
   A browser-based static analysis tool for PE binaries — powered by <strong>Rizin WASM</strong> and a visual node editor.
 </p>
 
-![alt text](img/image.png)
+![alt text](img/image2.png)
 
 <p align="center">
-  <a href="https://adriann17.github.io/malwstatic-pages/">
+  <a href="https://adriann17.github.io/malwstatic/>
     <img src="https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-66d9ef?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo" />
   </a>
 </p>
