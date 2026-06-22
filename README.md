@@ -15,7 +15,7 @@
 ![alt text](img/image.png)
 
 <p align="center">
-  <a href="https://adriann17.github.io/malwstatic/>
+  <a href="https://adriann17.github.io/malwstatic/">
     <img src="https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-66d9ef?style=for-the-badge&logo=github&logoColor=white" alt="Live Demo" />
   </a>
 </p>
@@ -82,41 +82,9 @@ The output file can be opened directly in any browser — no server needed.
 ## Usage
 
 1. **Load a PE binary** — click **PE Binary** and select a `.exe`. Rizin analyzes it in the browser and downloads a `.yaml` file automatically.
-2. **Load a YAML file** — click **YAML File** to open a previously saved analysis. Chrome/Edge use the File System Access API so `Ctrl+S` saves back to the same file; Firefox falls back to download.
-3. **Annotate** — click any instruction row, function header, or connection path to add a comment. Comments are saved with the YAML.
-4. **Save** — press `Ctrl+S` at any time.
-
----
-
-## Project Structure
-
-```
-src/
-├── init.ts                  # Entry point, event wiring
-├── rizin.ts                 # Rizin WASM integration
-├── utils.ts                 # UI utilities (toast)
-├── drawflow.d.ts            # Drawflow type declarations
-├── documentation/
-│   └── documentation.ts     # Draft/commit pattern wrapper
-├── export/
-│   └── exportYAML.ts        # YAML export, file picker, save-to-handle
-├── import/
-│   └── importYAML.ts        # YAML parser → data model
-├── node/
-│   └── node.ts              # Drawflow node builder & connection logic
-└── structure/
-    ├── decompiledPE.ts       # Base data model
-    └── decompiledReader.ts   # Extended model with comment fields
-```
-
----
-
-## Known Limitations
-
-- The Rizin WASM module is a singleton — loading a second PE in the same session reloads the page automatically to reset the module state.
-- `pdfj` (full disassembly per function) can be slow for large binaries with many functions.
-
----
+2. **Annotate** — click any instruction row, function header, or connection path to add a comment. Comments are saved with the YAML.
+3. **Save** — press `Ctrl+S` at any time.
+4. **Load a YAML file** — click **YAML File** to open a previously saved analysis. Chrome/Edge use the File System Access API so `Ctrl+S` saves back to the same file; Firefox falls back to download.
 
 ## License
 
