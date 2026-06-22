@@ -4,15 +4,12 @@ import { initRizin } from "./rizin";
 import { Documentation } from "./documentation/documentation";
 import { Node} from "./node/node";
 import { DecompiledReader } from "./structure/decompiledReader";
+import { DecompiledMapper } from "./structure/decompiledMapper";
 import { Utils } from "./utils";
 
-const RELOAD_TIMEOUT = 5000;
-
 initRizin((pe, filename) => {
-    const yaml = ExportYAML.export(pe);
-    ExportYAML.download(`${filename}.yaml`, yaml);
     Utils.showToast("✓ Extracted with Rizin");
-    setTimeout(() => location.reload(), RELOAD_TIMEOUT);
+    loadDecompiled(DecompiledMapper.writerToReader(pe), null, `${filename}.yaml`);
 });
 
 let currentDecompiled: DecompiledReader | null = null;
@@ -25,7 +22,8 @@ peCommentEl.addEventListener("input", () => {
     if (currentDecompiled) currentDecompiled.comment = peCommentEl.textContent ?? "";
 });
 
-async function loadYAML(file: File, handle: unknown = null): Promise<void> {
+
+function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string): void {
     node = null;
     documentation = null;
     currentDecompiled = null;
@@ -34,18 +32,23 @@ async function loadYAML(file: File, handle: unknown = null): Promise<void> {
 
     fileHandle = handle;
 
-    const text = await file.text();
-    const decompiled = ImportYAML.import(text);
     currentDecompiled = decompiled;
     peCommentEl.textContent = decompiled.comment ?? "";
 
     const span = document.getElementById("yamlFileName") as HTMLElement;
-    span.textContent = file.name;
+    span.textContent = name
     span.classList.add("chosen");
 
     documentation = new Documentation(decompiled);
     node = new Node(documentation);
     node.draw();
+}
+
+async function loadYAML(file: File, handle: unknown = null): Promise<void> {
+    const text = await file.text();
+    const decompiled = ImportYAML.import(text);
+
+    loadDecompiled(decompiled, handle, file.name);
 }
 
 document.getElementById("yamlBtn")!.addEventListener("click", async () => {

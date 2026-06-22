@@ -65,7 +65,7 @@ async function getDecompiledFunctions(
     session: number, 
     cmd: (session: number, command: string) => string): Promise<DecompiledWriter> {
 
-    const decompiledPE: DecompiledWriter = new DecompiledWriter(funcs.length);
+    const decompiledPE: DecompiledWriter = new DecompiledWriter();
 
     for (const func of funcs) {
         try {
