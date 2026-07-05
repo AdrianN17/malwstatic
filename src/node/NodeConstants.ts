@@ -1,5 +1,6 @@
 export const NODE_W             = 600;
 export const NODE_GAP           = 40;
+export const CFG_MAX_COLS       = 4;
 export const ROW                = 19;
 export const NODE_PADDING       = 24;
 export const LAYOUT_ORIGIN_X    = 50;
@@ -28,3 +29,11 @@ export const CSS_NODE_OUT       = "node_out_node-";
 export const CSS_FUNC_COMMENT   = "func-comment";
 export const CSS_INSTR_COMMENT  = "instr-comment";
 export const CSS_REF_COMMENT    = "ref-comment";
+
+export const CSS_INSTR_ROW        = "instr-row";
+export const CSS_HIGHLIGHTED      = "highlighted";
+export const CSS_NODE_HIGHLIGHTED = "node-highlighted";
+export const CSS_COLLAPSE_BTN     = "collapse-btn";
+export const CSS_COLLAPSED        = "collapsed";
+export const CSS_PIN_BTN          = "pin-btn";
+export const CSS_PINNED           = "pinned";

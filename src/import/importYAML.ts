@@ -8,9 +8,9 @@ export class ImportYAML {
         const decompiled = new DecompiledReader(parsed.comment ?? "");
 
         for (const func of parsed.functions ?? []) {
-            const fn = new FunctionReader(func.name ?? "", func.offset ?? "", func.comments ?? "");
+            const fn = new FunctionReader(func.name ?? "", func.offset ?? "", func.comments ?? "", func.x ?? 0, func.y ?? 0, func.visible ?? true, func.isMain ?? false, func.isHighlighted ?? false);
             for (const instr of func.Instructions ?? []) {
-                fn.Instructions.push(new InstructionReader(instr.offset ?? "", instr.opcode ?? "", instr.comment ?? ""));
+                fn.Instructions.push(new InstructionReader(instr.offset ?? "", instr.opcode ?? "", instr.comment ?? "", instr.isHighlighted ?? false));
             }
             decompiled.add(fn);
         }

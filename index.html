@@ -190,7 +190,7 @@
         font-style: italic;
       }
       .ref-comment {
-        position: fixed;
+        position: absolute;
         transform: translate(-50%, -50%);
         pointer-events: all;
         z-index: 10;
@@ -227,6 +227,94 @@
         content: 'PE comment…';
         color: rgba(230, 219, 116, 0.2);
         pointer-events: none;
+      }
+
+      /* ── Collapse button ── */
+      .collapse-btn {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        color: #75715e;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0 3px;
+        line-height: 1;
+        user-select: none;
+        transition: color 0.15s;
+      }
+      .collapse-btn:hover { color: #f92672; }
+      .pin-btn {
+        flex-shrink: 0;
+        background: none;
+        border: none;
+        color: #75715e;
+        cursor: pointer;
+        font-size: 11px;
+        padding: 0 3px;
+        line-height: 1;
+        user-select: none;
+        transition: color 0.15s;
+      }
+      .pin-btn:hover { color: #ae81ff; }
+      .drawflow-node.pinned {
+        border-color: #e6db74;
+        background: #302f25;
+        box-shadow: 0 0 0 2px rgba(230, 219, 116, 0.25), 0 4px 20px rgba(0,0,0,0.5);
+      }
+      .drawflow-node.pinned .drawflow_content_node strong {
+        color: #e6db74 !important;
+      }
+
+      /* ── Hidden nodes dropdown ── */
+      .hidden-nodes-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .hidden-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #1e1f1c;
+        border: 1px solid #49483e;
+        border-radius: 6px;
+        padding: 4px 0;
+        z-index: 200;
+        min-width: 220px;
+        max-height: 320px;
+        overflow-y: auto;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      }
+      .hidden-dropdown.open { display: block; }
+      .hidden-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 12px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #f8f8f2;
+        user-select: none;
+        transition: background 0.1s;
+      }
+      .hidden-dropdown-item:hover { background: #3e3d32; }
+      .hidden-dropdown-item input[type="checkbox"] {
+        accent-color: #a6e22e;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      /* ── Highlight on right-click ── */
+      .instr-row.highlighted {
+        background: rgba(253, 151, 31, 0.18);
+        border-radius: 3px;
+        outline: 1px solid rgba(253, 151, 31, 0.35);
+        outline-offset: -1px;
+      }
+      .drawflow-node.node-highlighted {
+        border-color: #fd971f;
+        box-shadow: 0 0 0 2px rgba(253, 151, 31, 0.3), 0 4px 20px rgba(0,0,0,0.5);
       }
 
       .toast {
@@ -273,6 +361,94 @@
       }
       .drawflow > .drawflow-delete { margin-left: -11px; margin-top: 11px }
       .parent-node .drawflow-delete { right: -11px; top: -11px }
+
+      /* ── Main selector ── */
+      .main-select-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .main-select {
+        padding: 4px 8px;
+        background: #2d2e2a;
+        border: 1px solid #49483e;
+        border-radius: 6px;
+        color: #f8f8f2;
+        font-size: 12px;
+        cursor: pointer;
+        max-width: 200px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .main-select:hover, .main-select:focus { border-color: #e6db74; }
+      .main-select option { background: #1e1f1c; }
+
+      /* ── Navigation controls ── */
+      .nav-controls {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .nav-btn {
+        padding: 4px 10px;
+        background: #2d2e2a;
+        border: 1px solid #49483e;
+        border-radius: 5px;
+        color: #75715e;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        user-select: none;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+      }
+      .nav-btn:hover { background: #3e3d32; border-color: #ae81ff; color: #f8f8f2; }
+      .nav-btn:active { background: #49483e; }
+
+      /* ── Minimap ── */
+      #minimapPanel {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #1a1b18;
+        border: 1px solid #49483e;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        z-index: 100;
+        user-select: none;
+        resize: both;
+        min-width: 120px;
+        min-height: 80px;
+      }
+      #minimapPanel.collapsed #minimapCanvas { display: none; }
+      #minimapHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 8px;
+        background: #1e1f1c;
+        border-bottom: 1px solid #49483e;
+        font-size: 11px;
+        color: #75715e;
+        cursor: move;
+      }
+      #minimapToggle {
+        background: none;
+        border: none;
+        color: #75715e;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        padding: 0 2px;
+        transition: color 0.15s;
+      }
+      #minimapToggle:hover { color: #f8f8f2; }
+      #minimapCanvas {
+        display: block;
+        cursor: crosshair;
+        width: 200px;
+        height: 150px;
+      }
     </style>
 </head>
 <body>
@@ -296,10 +472,44 @@
 
         <div class="toolbar-sep"></div>
 
-        <span class="file-label">
+        <span id="peCommentWrap" class="file-label" style="display:none">
             <span style="color:#75715e;font-size:12px;flex-shrink:0;">PE:</span>
             <span id="peComment" contenteditable="true" class="pe-comment"></span>
         </span>
+
+        <div class="toolbar-sep" id="hiddenSep" style="display:none"></div>
+        <div class="hidden-nodes-wrap" id="hiddenNodesWrap" style="display:none">
+            <button class="but" id="hiddenNodesBtn">Hidden: <span id="hiddenCount">0</span></button>
+            <div class="hidden-dropdown" id="hiddenDropdown"></div>
+        </div>
+
+        <div class="toolbar-sep" id="hideUnrefSep" style="display:none"></div>
+        <button class="but" id="hideUnreferencedBtn" style="display:none">Hide unreferenced</button>
+
+        <div class="toolbar-sep" id="mainSelSep" style="display:none"></div>
+        <div class="main-select-wrap" id="mainSelectWrap" style="display:none">
+            <label style="font-size:12px;color:#75715e;flex-shrink:0;">Main:</label>
+            <select id="mainSelect" class="main-select"></select>
+        </div>
+
+        <div style="flex:1"></div>
+
+        <!-- Navigation controls (always visible) -->
+        <div class="nav-controls">
+            <button class="nav-btn" id="fitViewBtn" title="Fit to view (F)">⊡</button>
+            <button class="nav-btn" id="zoomInBtn"  title="Zoom in (+)">+</button>
+            <button class="nav-btn" id="zoomOutBtn" title="Zoom out (-)">−</button>
+            <button class="nav-btn" id="resetZoomBtn" title="Reset zoom (0)">1:1</button>
+        </div>
+    </div>
+
+    <!-- Floating minimap -->
+    <div id="minimapPanel">
+        <div id="minimapHeader">
+            <span>Map</span>
+            <button id="minimapToggle" title="Collapse">−</button>
+        </div>
+        <canvas id="minimapCanvas" width="200" height="150"></canvas>
     </div>
 
     <div id="drawflow"></div>
