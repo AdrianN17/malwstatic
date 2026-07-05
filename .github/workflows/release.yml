@@ -88,3 +88,11 @@ jobs:
           tags: |
             adriann17/malwstatic:latest
             adriann17/malwstatic:${{ github.ref_name }}
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: adriann17/malwstatic
+          readme-filepath: ./README.md
