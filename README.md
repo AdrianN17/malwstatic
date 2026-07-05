@@ -1,7 +1,7 @@
 # Malwstatic
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-a6e22e?style=for-the-badge" alt="version" />
+  <img src="https://img.shields.io/github/package-json/v/adriann17/malwstatic?style=for-the-badge&color=a6e22e" alt="version" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Bun-runtime-f9f1e1?style=for-the-badge&logo=bun&logoColor=black" alt="Bun" />
   <img src="https://img.shields.io/badge/Rizin-WASM-f92672?style=for-the-badge" alt="Rizin" />
@@ -9,7 +9,8 @@
 </p>
 
 <p align="center">
-  A browser-based static analysis tool for PE binaries — powered by <strong>Rizin WASM</strong> and a visual node editor.
+  A browser-based static analysis tool for PE binaries — powered by <strong>Rizin WASM</strong> and a visual node editor.<br/>
+  Designed for reverse engineers to analyze, annotate, and document malware behavior without leaving the browser.
 </p>
 
 ![alt text](img/image.png)
