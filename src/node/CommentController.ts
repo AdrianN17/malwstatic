@@ -1,6 +1,7 @@
 import { Documentation } from "../documentation/documentation";
 import { FunctionReader, InstructionReader } from "../structure/decompiledReader";
 import { CSS_INSTR_COMMENT, CSS_FUNC_COMMENT, COMMENT_COLOR } from "./NodeConstants";
+import { UndoHistory } from "../undoHistory";
 
 const TOOLTIP_ID = "malw-comment-tooltip";
 
@@ -10,11 +11,45 @@ export class CommentController {
         private readonly container: HTMLElement,
         private readonly instrByOffset: Map<string, InstructionReader>,
         private readonly documentation: Documentation,
+        private readonly history: UndoHistory,
     ) {}
 
     setup(): AbortController {
         const controller = new AbortController();
         const { signal } = controller;
+
+        let _editEl: HTMLElement | null = null;
+        let _editBefore = "";
+
+        this.container.addEventListener("focusin", (e) => {
+            const t = e.target as HTMLElement;
+            if (t.classList.contains(CSS_INSTR_COMMENT) || t.classList.contains(CSS_FUNC_COMMENT)) {
+                _editEl = t;
+                _editBefore = t.textContent ?? "";
+            }
+        }, { signal });
+
+        this.container.addEventListener("focusout", () => {
+            if (!_editEl) return;
+            const el = _editEl;
+            const before = _editBefore;
+            _editEl = null;
+            _editBefore = "";
+            const after = el.textContent ?? "";
+            if (after === before) return;
+            const decomp = this.documentation.get();
+            let applyFn: (text: string) => void;
+            if (el.classList.contains(CSS_INSTR_COMMENT)) {
+                const instr = this.instrByOffset.get(el.dataset.offset!);
+                applyFn = text => { el.textContent = text; if (instr) instr.comment = text; };
+            } else {
+                const func = decomp.functions.find(
+                    f => f.offset.toLowerCase() === el.dataset.offset!
+                ) as FunctionReader | undefined;
+                applyFn = text => { el.textContent = text; if (func) func.comments = text; };
+            }
+            this.history.push({ undo: () => applyFn(before), redo: () => applyFn(after) });
+        }, { signal });
 
         this.container.addEventListener("input", (e) => {
             const target = e.target as HTMLElement;

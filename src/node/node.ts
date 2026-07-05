@@ -17,13 +17,15 @@ import { NodeLayout } from "./NodeLayout";
 import { ConnectionRenderer } from "./ConnectionRenderer";
 import { CommentController } from "./CommentController";
 import { highlightAsm } from "./asmHighlight";
+import { UndoHistory } from "../undoHistory";
 
 export class Node {
 
     documentation: Documentation;
-    onNodeHidden:   ((name: string, restore: () => void) => void) | null = null;
+    onNodeHidden:    ((name: string, restore: () => void) => void) | null = null;
+    onNodeRestored:  ((name: string) => void) | null = null;
     /** Fires whenever the pinned main changes — passes the new main's offset (or "" if unpinned). */
-    onMainChanged:  ((offset: string) => void) | null = null;
+    onMainChanged:   ((offset: string) => void) | null = null;
 
     private editor:       Drawflow | null = null;
     private container:    HTMLElement | null = null;
@@ -34,11 +36,12 @@ export class Node {
     private nodeIdToFuncOffset = new Map<number, string>();
     private _commentController: AbortController | null = null;
     private _connRenderer: ConnectionRenderer | null = null;
+    private _moveController: AbortController | null = null;
     private readonly _suppress = { connectionCreated: false };
 
     private readonly layout = new NodeLayout();
 
-    constructor(documentation: Documentation) {
+    constructor(documentation: Documentation, private readonly _history: UndoHistory) {
         this.documentation = documentation;
     }
 
@@ -115,6 +118,7 @@ export class Node {
         this.container = document.getElementById(DRAWFLOW_ID) as HTMLElement;
 
         this._commentController?.abort();
+        this._moveController?.abort();
         this.container.innerHTML = "";
         this.offsetToNodeId.clear();
         this.instrToPort.clear();
@@ -146,7 +150,41 @@ export class Node {
             const svg = this.container!.querySelector(
                 `.connection.${CSS_NODE_IN}${data.input_id}.${CSS_NODE_OUT}${data.output_id}.${data.output_class}.${data.input_class}`
             ) as SVGElement | null;
-            if (svg) this._connRenderer!.addRefCommentLabel(svg, "", offsetA, offsetB);
+            if (svg) {
+                svg.dataset.offsetA = offsetA;
+                svg.dataset.offsetB = offsetB;
+                this._connRenderer!.addRefCommentLabel(svg, "", offsetA, offsetB);
+                const path = svg.querySelector<SVGPathElement>(`.${CSS_MAIN_PATH}`);
+                if (path) {
+                    path.addEventListener('contextmenu', (e: Event) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const oa = offsetA, ob = offsetB;
+                        const decompiled = this.documentation.get();
+                        this._history.push({
+                            undo: () => {
+                                if (!decompiled.references.some(r => r.offsetA === oa && r.offsetB === ob)) {
+                                    decompiled.references.push(new ReferenceReader(oa, ob, ""));
+                                }
+                                this._connRenderer!.draw(oa, ob, "");
+                            },
+                            redo: () => this._connRenderer!.deleteConnection(oa, ob),
+                        });
+                        this._connRenderer!.deleteConnection(oa, ob);
+                    });
+                }
+                // Track creation for undo
+                this._history.push({
+                    undo: () => this._connRenderer!.deleteConnection(offsetA, offsetB),
+                    redo: () => {
+                        const decompiled = this.documentation.get();
+                        if (!decompiled.references.some(r => r.offsetA === offsetA && r.offsetB === offsetB)) {
+                            decompiled.references.push(new ReferenceReader(offsetA, offsetB));
+                        }
+                        this._connRenderer!.draw(offsetA, offsetB, "");
+                    },
+                });
+            }
         });
 
         const decompiled = this.documentation.get();
@@ -156,6 +194,23 @@ export class Node {
         );
 
         let _rebuildTimer: ReturnType<typeof setTimeout> | null = null;
+        let _dragStart: { nid: number; x: number; y: number } | null = null;
+
+        this._moveController = new AbortController();
+        this.container.addEventListener('mousedown', (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.isContentEditable || target.tagName === 'BUTTON') return;
+            const nodeEl = target.closest<HTMLElement>('.drawflow-node');
+            if (!nodeEl) return;
+            const nid = parseInt(nodeEl.id.slice('node-'.length), 10);
+            if (isNaN(nid)) return;
+            const fo = this.nodeIdToFuncOffset.get(nid);
+            if (!fo) return;
+            const fn = funcByOffset.get(fo);
+            if (!fn) return;
+            _dragStart = { nid, x: fn.x, y: fn.y };
+        }, { signal: this._moveController.signal });
+
         this.editor.on("nodeMoved", (id: string) => {
             const nid = parseInt(id, 10);
             const funcOffset = this.nodeIdToFuncOffset.get(nid);
@@ -165,9 +220,28 @@ export class Node {
             const data = this.editor!.getNodeFromId(nid);
             func.updatePosition(data.pos_x, data.pos_y);
 
-            // Debounced rebuild: recalculates optimal port side + path after drag ends.
+            // Debounced rebuild + history push after drag ends.
             if (_rebuildTimer) clearTimeout(_rebuildTimer);
-            _rebuildTimer = setTimeout(() => this._connRenderer?.rebuildConnections(), 180);
+            _rebuildTimer = setTimeout(() => {
+                this._connRenderer?.rebuildConnections();
+                if (_dragStart && _dragStart.nid === nid) {
+                    const { x: bx, y: by } = _dragStart;
+                    _dragStart = null;
+                    if (func.x !== bx || func.y !== by) {
+                        const ax = func.x, ay = func.y;
+                        const moveNode = (x: number, y: number) => {
+                            func.updatePosition(x, y);
+                            const el = this.container!.querySelector<HTMLElement>(`#node-${nid}`);
+                            if (el) { el.style.left = x + "px"; el.style.top = y + "px"; }
+                            const dfData = (this.editor as any).drawflow.drawflow.Home.data as Record<string, any>;
+                            if (dfData[nid]) { dfData[nid].pos_x = x; dfData[nid].pos_y = y; }
+                            (this.editor as any).updateConnectionNodes(`node-${nid}`);
+                            requestAnimationFrame(() => this._connRenderer?.rebuildConnections());
+                        };
+                        this._history.push({ undo: () => moveNode(bx, by), redo: () => moveNode(ax, ay) });
+                    }
+                }
+            }, 180);
         });
 
         this.offsetToNodeId.clear();
@@ -219,12 +293,21 @@ export class Node {
                 collapseBtn.addEventListener("mousedown", e => e.stopPropagation());
                 collapseBtn.addEventListener("click", e => {
                     e.stopPropagation();
-                    nodeEl.style.display = "none";
-                    func.visible = false;
-                    this.onNodeHidden?.(func.name, () => {
+                    const doHide = () => {
+                        nodeEl.style.display = "none";
+                        func.visible = false;
+                        this.onNodeHidden?.(func.name, () => {
+                            nodeEl.style.display = "";
+                            func.visible = true;
+                        });
+                    };
+                    const doShow = () => {
                         nodeEl.style.display = "";
                         func.visible = true;
-                    });
+                        this.onNodeRestored?.(func.name);
+                    };
+                    this._history.push({ undo: doShow, redo: doHide });
+                    doHide();
                 });
             }
 
@@ -263,19 +346,29 @@ export class Node {
             nodeEl.addEventListener("contextmenu", e => {
                 e.preventDefault();
                 if (nodeEl.classList.contains(CSS_PINNED)) return;
-                const highlighted = nodeEl.classList.toggle(CSS_NODE_HIGHLIGHTED);
-                func.isHighlighted = highlighted;
+                const before = func.isHighlighted;
+                const after = !before;
+                const apply = (val: boolean) => {
+                    func.isHighlighted = val;
+                    nodeEl.classList.toggle(CSS_NODE_HIGHLIGHTED, val);
+                };
+                this._history.push({ undo: () => apply(before), redo: () => apply(after) });
+                apply(after);
             });
             nodeEl.querySelectorAll<HTMLElement>(`.${CSS_INSTR_ROW}`).forEach(rowEl => {
                 rowEl.addEventListener("contextmenu", e => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const highlighted = rowEl.classList.toggle(CSS_HIGHLIGHTED);
+                    const before = rowEl.classList.contains(CSS_HIGHLIGHTED);
+                    const after = !before;
                     const offset = rowEl.dataset.offset;
-                    if (offset) {
-                        const instr = this.instrByOffset.get(offset);
-                        if (instr) instr.isHighlighted = highlighted;
-                    }
+                    const instr = offset ? this.instrByOffset.get(offset) : undefined;
+                    const apply = (val: boolean) => {
+                        rowEl.classList.toggle(CSS_HIGHLIGHTED, val);
+                        if (instr) instr.isHighlighted = val;
+                    };
+                    this._history.push({ undo: () => apply(before), redo: () => apply(after) });
+                    apply(after);
                 });
             });
 
@@ -312,10 +405,10 @@ export class Node {
         });
 
         this._connRenderer = new ConnectionRenderer(
-            this.editor, this.container, this.instrToPort, this.documentation, this._suppress
+            this.editor, this.container, this.instrToPort, this.documentation, this._suppress, this._history
         );
         this._commentController = new CommentController(
-            this.container, this.instrByOffset, this.documentation
+            this.container, this.instrByOffset, this.documentation, this._history
         ).setup();
 
         requestAnimationFrame(() => {

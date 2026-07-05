@@ -7,6 +7,7 @@ import { DecompiledReader } from "./structure/decompiledReader";
 import { DecompiledMapper } from "./structure/decompiledMapper";
 import { Utils } from "./utils";
 import { Minimap, resetZoom } from "./minimap";
+import { UndoHistory } from "./undoHistory";
 
 initRizin((pe, filename) => {
     Utils.showToast("✓ Extracted with Rizin");
@@ -18,9 +19,22 @@ let fileHandle: any = null;
 let node: Node | null = null;
 let documentation: Documentation | null = null;
 let canvasObserver: MutationObserver | null = null;
+const history = new UndoHistory();
 
 const peCommentEl     = document.getElementById("peComment")     as HTMLElement;
 const peCommentWrapEl = document.getElementById("peCommentWrap") as HTMLElement;
+let _peCommentBefore = "";
+peCommentEl.addEventListener("focusin", () => { _peCommentBefore = peCommentEl.textContent ?? ""; });
+peCommentEl.addEventListener("focusout", () => {
+    const after = peCommentEl.textContent ?? "";
+    if (!currentDecompiled || after === _peCommentBefore) return;
+    const before = _peCommentBefore;
+    const decomp = currentDecompiled;
+    history.push({
+        undo: () => { peCommentEl.textContent = before; decomp.comment = before; },
+        redo: () => { peCommentEl.textContent = after;  decomp.comment = after;  },
+    });
+});
 peCommentEl.addEventListener("input", () => {
     if (currentDecompiled) currentDecompiled.comment = peCommentEl.textContent ?? "";
 });
@@ -255,6 +269,7 @@ function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string)
     hideFuncPanel();
 
     fileHandle = handle;
+    history.clear();
 
     currentDecompiled = decompiled;
     peCommentEl.textContent        = decompiled.comment ?? "";
@@ -265,8 +280,17 @@ function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string)
     span.classList.add("chosen");
 
     documentation = new Documentation(decompiled);
-    node = new Node(documentation);
+    node = new Node(documentation, history);
     node.onNodeHidden = addHiddenNode;
+    node.onNodeRestored = (funcName) => {
+        for (const key of hiddenNodes.keys()) {
+            if (key === funcName || key.startsWith(funcName + " (")) {
+                hiddenNodes.delete(key);
+                break;
+            }
+        }
+        renderHiddenDropdown();
+    };
     node.onMainChanged = (offset) => {
         if (offset) mainSelect.value = offset;
         // Rebuild options in case visibility changed
@@ -372,6 +396,10 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     const tag = (e.target as HTMLElement).tagName;
     const ce  = (e.target as HTMLElement).isContentEditable;
     if (tag === "INPUT" || tag === "TEXTAREA" || ce) return;
+
+    // Undo / Redo
+    if (e.ctrlKey && e.key === "z" && !e.shiftKey) { e.preventDefault(); history.undo(); return; }
+    if (e.ctrlKey && (e.key === "Z" || (e.key === "z" && e.shiftKey) || e.key === "y")) { e.preventDefault(); history.redo(); return; }
 
     const info = node?.getEditorInfo();
     if (!info) return;

@@ -6,6 +6,7 @@ import {
     CSS_MAIN_PATH, CSS_NODE_IN, CSS_NODE_OUT,
     CSS_USED, CSS_REF_COMMENT, NODE_W,
 } from "./NodeConstants";
+import { UndoHistory } from "../undoHistory";
 
 export class ConnectionRenderer {
 
@@ -20,6 +21,7 @@ export class ConnectionRenderer {
         private readonly instrToPort: Map<string, { nodeId: number; inputPort: number }>,
         private readonly documentation: Documentation,
         private readonly suppress: { connectionCreated: boolean },
+        private readonly history: UndoHistory,
     ) {
         // Reroute paths on node movement (translate/zoom don't change world-space paths)
         const scheduleReroute = () => {
@@ -125,7 +127,19 @@ export class ConnectionRenderer {
                 path.addEventListener('contextmenu', (e: Event) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this._deleteConnection(fromInstrOffset.toLowerCase(), toOffset.toLowerCase());
+                    const oa = fromInstrOffset.toLowerCase(), ob = toOffset.toLowerCase();
+                    const savedComment = this._connections.find(c => c.from === oa && c.to === ob)?.comment ?? comment;
+                    this.history.push({
+                        undo: () => {
+                            const decompiled = this.documentation.get();
+                            if (!decompiled.references.some(r => r.offsetA === oa && r.offsetB === ob)) {
+                                decompiled.references.push(new ReferenceReader(oa, ob, savedComment));
+                            }
+                            this.draw(oa, ob, savedComment);
+                        },
+                        redo: () => this.deleteConnection(oa, ob),
+                    });
+                    this.deleteConnection(oa, ob);
                 });
             }
             // Apply path synchronously — drawflow sets `d` inside addConnection, so it's ready now.
@@ -134,8 +148,8 @@ export class ConnectionRenderer {
         }
     }
 
-    /** Delete a connection and its reference entirely. */
-    private _deleteConnection(offsetA: string, offsetB: string): void {
+    /** Delete a connection and its reference entirely (no history push). */
+    deleteConnection(offsetA: string, offsetB: string): void {
         // Remove from tracked list
         this._connections = this._connections.filter(
             c => !(c.from === offsetA && c.to === offsetB)
@@ -255,6 +269,20 @@ export class ConnectionRenderer {
         div.dataset.offsetA = offsetA;
         div.dataset.offsetB = offsetB;
         div.style.display = "none";
+        let _refEditBefore = "";
+        div.addEventListener("focusin", () => { _refEditBefore = div.textContent ?? ""; });
+        div.addEventListener("focusout", () => {
+            const after = div.textContent ?? "";
+            if (after === _refEditBefore) return;
+            const before = _refEditBefore;
+            const ref = this.documentation.get().references.find(
+                r => r.offsetA === offsetA && r.offsetB === offsetB
+            ) as ReferenceReader | undefined;
+            this.history.push({
+                undo: () => { div.textContent = before; if (ref) ref.comment = before; },
+                redo: () => { div.textContent = after; if (ref) ref.comment = after; },
+            });
+        });
         div.addEventListener("mousedown", e => e.stopPropagation());
         div.addEventListener("input", () => {
             const ref = this.documentation.get().references.find(
