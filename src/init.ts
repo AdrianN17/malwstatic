@@ -266,6 +266,18 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     } else if (e.key === "-") {
         e.preventDefault();
         info.editor.zoom_out();
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown" ||
+               e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const step = e.shiftKey ? 200 : 60;
+        const cvs  = info.container.querySelector<HTMLElement>('.drawflow')!;
+        const dx   = e.key === "ArrowLeft" ? step : e.key === "ArrowRight" ? -step : 0;
+        const dy   = e.key === "ArrowUp"   ? step : e.key === "ArrowDown"  ? -step : 0;
+        const newX = info.editor.canvas_x + dx;
+        const newY = info.editor.canvas_y + dy;
+        cvs.style.transform         = `translate(${newX}px, ${newY}px) scale(${info.editor.zoom_last_value})`;
+        info.editor.canvas_x        = newX;
+        info.editor.canvas_y        = newY;
     }
 });
 

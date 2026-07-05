@@ -21,16 +21,15 @@ export class ConnectionRenderer {
         private readonly documentation: Documentation,
         private readonly suppress: { connectionCreated: boolean },
     ) {
-        const scheduleUpdate = () => {
+        // Reroute paths on node movement (translate/zoom don't change world-space paths)
+        const scheduleReroute = () => {
             requestAnimationFrame(() => {
                 this._rerouteAll();
                 this._labelUpdaters.forEach(fn => fn());
             });
         };
-        this.editor.on("translate",  scheduleUpdate);
-        this.editor.on("zoom",       scheduleUpdate);
-        this.editor.on("nodeMoved",  scheduleUpdate);
-        this.editor.on("mouseMove",  scheduleUpdate);
+        this.editor.on("nodeMoved", scheduleReroute);
+        this.editor.on("mouseMove", scheduleReroute);
     }
 
     /** Record and draw a reference connection. */
@@ -264,7 +263,9 @@ export class ConnectionRenderer {
             if (ref) ref.comment = div.textContent ?? "";
         });
 
-        this.container.appendChild(div);
+        // Append inside the inner canvas so pan/zoom moves the label automatically
+        const innerCanvas = this.container.querySelector<HTMLElement>('.drawflow') ?? this.container;
+        innerCanvas.appendChild(div);
 
         const reposition = () => {
             if (!svg.isConnected) { div.remove(); return; }
@@ -273,14 +274,9 @@ export class ConnectionRenderer {
             const len = path.getTotalLength();
             if (!len) return;
             const mid = path.getPointAtLength(len / 2);
-            const pt  = (svg as SVGSVGElement).createSVGPoint();
-            pt.x = mid.x;
-            pt.y = mid.y;
-            const ctm = path.getScreenCTM();
-            if (!ctm) return;
-            const screen = pt.matrixTransform(ctm);
-            div.style.left    = `${screen.x}px`;
-            div.style.top     = `${screen.y}px`;
+            // mid.x/y are already in world-space (same coordinate system as node left/top)
+            div.style.left    = `${mid.x}px`;
+            div.style.top     = `${mid.y}px`;
             div.style.display = "";
         };
 
