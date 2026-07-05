@@ -8,6 +8,9 @@ import { DecompiledMapper } from "./structure/decompiledMapper";
 import { Utils } from "./utils";
 import { Minimap, resetZoom } from "./minimap";
 import { UndoHistory } from "./undoHistory";
+import pkg from "../package.json";
+
+(document.getElementById("appVersion") as HTMLElement).textContent = `v${pkg.version}`;
 
 initRizin((pe, filename) => {
     Utils.showToast("✓ Extracted with Rizin");
