@@ -60,7 +60,53 @@
         background-size: 24px 24px;
       }
 
-      /* ── Drawflow node & connection styles ── */
+      /* ── Welcome overlay ── */
+      #welcomeOverlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        pointer-events: none;
+        z-index: 10;
+      }
+      #welcomeOverlay h2 {
+        font-size: 15px;
+        color: #75715e;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .shortcut-grid {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 8px 24px;
+        align-items: center;
+      }
+      .shortcut-key {
+        display: flex;
+        gap: 4px;
+        justify-content: flex-end;
+      }
+      .kbd {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #1e1f1c;
+        border: 1px solid #49483e;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #a6e22e;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        white-space: nowrap;
+      }
+      .shortcut-desc {
+        font-size: 12px;
+        color: #75715e;
+      }
+
+
       .drawflow, .drawflow .parent-node { position: relative }
       .parent-drawflow { display: flex; overflow: hidden; touch-action: none; outline: 0 }
       .drawflow { width: 100%; height: 100%; user-select: none; perspective: 0 }
@@ -647,7 +693,36 @@
         <div class="func-list" id="funcList"></div>
     </div>
 
-    <div id="drawflow"></div>
+    <div id="drawflow">
+      <div id="welcomeOverlay">
+        <h2>Keyboard shortcuts</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-key"><span class="kbd">Ctrl</span><span class="kbd">S</span></div>
+          <div class="shortcut-desc">Save</div>
+
+          <div class="shortcut-key"><span class="kbd">Ctrl</span><span class="kbd">Z</span></div>
+          <div class="shortcut-desc">Undo</div>
+
+          <div class="shortcut-key"><span class="kbd">Ctrl</span><span class="kbd">Shift</span><span class="kbd">Z</span></div>
+          <div class="shortcut-desc">Redo</div>
+
+          <div class="shortcut-key"><span class="kbd">+</span><span class="kbd">-</span></div>
+          <div class="shortcut-desc">Zoom in / out</div>
+
+          <div class="shortcut-key"><span class="kbd">0</span></div>
+          <div class="shortcut-desc">Reset zoom</div>
+
+          <div class="shortcut-key"><span class="kbd">↑ ↓ ← →</span></div>
+          <div class="shortcut-desc">Pan view</div>
+
+          <div class="shortcut-key"><span class="kbd">Right click</span> node</div>
+          <div class="shortcut-desc">Highlight node / instruction</div>
+
+          <div class="shortcut-key"><span class="kbd">Right click</span> edge</div>
+          <div class="shortcut-desc">Delete connection</div>
+        </div>
+      </div>
+    </div>
 
     <div id="saveToast" class="toast"></div>
     <script src="https://indalok.github.io/rzwasi/rizin.js"></script>

@@ -270,6 +270,7 @@ function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string)
 
     fileHandle = handle;
     history.clear();
+    (document.getElementById("welcomeOverlay") as HTMLElement).style.display = "none";
 
     currentDecompiled = decompiled;
     peCommentEl.textContent        = decompiled.comment ?? "";
