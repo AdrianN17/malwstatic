@@ -6,6 +6,8 @@
   <img src="https://img.shields.io/badge/Bun-runtime-f9f1e1?style=for-the-badge&logo=bun&logoColor=black" alt="Bun" />
   <img src="https://img.shields.io/badge/Rizin-WASM-f92672?style=for-the-badge" alt="Rizin" />
   <img src="https://img.shields.io/badge/license-MIT-ae81ff?style=for-the-badge" alt="license" />
+  <a href="https://hub.docker.com/r/adriann17/malwstatic"><img src="https://img.shields.io/docker/v/adriann17/malwstatic?style=for-the-badge&logo=docker&logoColor=white&label=docker&color=2496ed" alt="Docker" /></a>
+  <a href="https://hub.docker.com/r/adriann17/malwstatic"><img src="https://img.shields.io/docker/pulls/adriann17/malwstatic?style=for-the-badge&logo=docker&logoColor=white&color=2496ed" alt="Docker Pulls" /></a>
 </p>
 
 <p align="center">
@@ -90,3 +92,13 @@ The output file can be opened directly in any browser — no server needed.
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
+
+---
+
+## Docker
+
+```bash
+docker run -p 8080:80 adriann17/malwstatic
+```
+
+Then open **http://localhost:8080** in your browser.
