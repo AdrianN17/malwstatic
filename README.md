@@ -7,7 +7,6 @@
   <img src="https://img.shields.io/badge/Rizin-WASM-f92672?style=for-the-badge" alt="Rizin" />
   <img src="https://img.shields.io/badge/license-MIT-ae81ff?style=for-the-badge" alt="license" />
   <a href="https://hub.docker.com/r/adriann17/malwstatic"><img src="https://img.shields.io/docker/v/adriann17/malwstatic?style=for-the-badge&logo=docker&logoColor=white&label=docker&color=2496ed" alt="Docker" /></a>
-  <a href="https://hub.docker.com/r/adriann17/malwstatic"><img src="https://img.shields.io/docker/pulls/adriann17/malwstatic?style=for-the-badge&logo=docker&logoColor=white&color=2496ed" alt="Docker Pulls" /></a>
 </p>
 
 <p align="center">
