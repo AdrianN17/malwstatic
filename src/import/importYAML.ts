@@ -5,7 +5,7 @@ export class ImportYAML {
     public static import(yamlText: string): DecompiledReader {
         const parsed = YAML.parse(yamlText);
 
-        const decompiled = new DecompiledReader(parsed.comment ?? "");
+        const decompiled = new DecompiledReader(parsed.comment ?? "", parsed.x ?? 0, parsed.y ?? 0, parsed.zoom ?? 1);
 
         for (const func of parsed.functions ?? []) {
             const fn = new FunctionReader(func.name ?? "", func.offset ?? "", func.comments ?? "", func.x ?? 0, func.y ?? 0, func.visible ?? true, func.isMain ?? false, func.isHighlighted ?? false);

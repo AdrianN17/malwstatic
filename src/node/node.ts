@@ -48,6 +48,28 @@ export class Node {
         return { editor: this.editor as any, container: this.container };
     }
 
+    /** Pan the canvas to centre on the node for the given function offset. */
+    focusFunctionByOffset(offset: string): void {
+        if (!this.editor || !this.container) return;
+        const nodeId = this.offsetToNodeId.get(offset.toLowerCase());
+        if (nodeId === undefined) return;
+        const el = this.container.querySelector<HTMLElement>(`#node-${nodeId}`);
+        if (!el) return;
+        const x  = parseFloat(el.style.left) || 0;
+        const y  = parseFloat(el.style.top)  || 0;
+        const cx = x + (el.offsetWidth  || 300) / 2;
+        const cy = y + (el.offsetHeight || 120) / 2;
+        const zoom = (this.editor as any).zoom_last_value as number;
+        const tx = this.container.offsetWidth  / 2 - cx * zoom;
+        const ty = this.container.offsetHeight / 2 - cy * zoom;
+        const cvs = this.container.querySelector<HTMLElement>('.drawflow');
+        if (!cvs) return;
+        cvs.style.transform              = `translate(${tx}px, ${ty}px) scale(${zoom})`;
+        (this.editor as any).canvas_x    = tx;
+        (this.editor as any).canvas_y    = ty;
+        (this.editor as any).zoom_last_value = zoom;
+    }
+
     /**
      * Programmatically set the pinned main function by offset.
      * Unpins the previous main, pins the new one, and triggers relayout.

@@ -6,7 +6,7 @@ import { Node} from "./node/node";
 import { DecompiledReader } from "./structure/decompiledReader";
 import { DecompiledMapper } from "./structure/decompiledMapper";
 import { Utils } from "./utils";
-import { Minimap, fitToView, resetZoom } from "./minimap";
+import { Minimap, resetZoom } from "./minimap";
 
 initRizin((pe, filename) => {
     Utils.showToast("✓ Extracted with Rizin");
@@ -17,12 +17,100 @@ let currentDecompiled: DecompiledReader | null = null;
 let fileHandle: any = null;
 let node: Node | null = null;
 let documentation: Documentation | null = null;
+let canvasObserver: MutationObserver | null = null;
 
 const peCommentEl     = document.getElementById("peComment")     as HTMLElement;
 const peCommentWrapEl = document.getElementById("peCommentWrap") as HTMLElement;
 peCommentEl.addEventListener("input", () => {
     if (currentDecompiled) currentDecompiled.comment = peCommentEl.textContent ?? "";
 });
+
+// ── Function panel (hamburger) ──
+const funcPanelSep   = document.getElementById("funcPanelSep")   as HTMLElement;
+const funcPanelBtn   = document.getElementById("funcPanelBtn")   as HTMLButtonElement;
+const funcPanel      = document.getElementById("funcPanel")      as HTMLElement;
+const funcPanelClose = document.getElementById("funcPanelClose") as HTMLButtonElement;
+const funcSearch     = document.getElementById("funcSearch")     as HTMLInputElement;
+const funcList       = document.getElementById("funcList")       as HTMLElement;
+
+funcPanelBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = funcPanel.classList.toggle("open");
+    funcPanelBtn.classList.toggle("active", open);
+    if (open) {
+        funcSearch.value = "";
+        renderFuncList("");
+        funcSearch.focus();
+    }
+});
+
+funcPanelClose.addEventListener("click", () => {
+    funcPanel.classList.remove("open");
+    funcPanelBtn.classList.remove("active");
+});
+
+funcSearch.addEventListener("input", () => renderFuncList(funcSearch.value));
+
+// Close panel when clicking outside of it
+document.addEventListener("click", (e) => {
+    if (funcPanel.classList.contains("open") &&
+        !funcPanel.contains(e.target as globalThis.Node) &&
+        e.target !== funcPanelBtn) {
+        funcPanel.classList.remove("open");
+        funcPanelBtn.classList.remove("active");
+    }
+});
+
+function renderFuncList(query: string): void {
+    funcList.innerHTML = "";
+    if (!documentation) return;
+    const q = query.trim().toLowerCase();
+    const funcs = documentation.get().functions
+        .filter(f => !q || f.name.toLowerCase().includes(q) || f.offset.toLowerCase().includes(q));
+
+    if (funcs.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "func-empty";
+        empty.textContent = "No functions found";
+        funcList.appendChild(empty);
+        return;
+    }
+
+    funcs.forEach(f => {
+        const item = document.createElement("div");
+        item.className = "func-item";
+        item.title = `${f.name}  (${f.offset})`;
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "func-item-name";
+        nameEl.textContent = f.name;
+
+        const offEl = document.createElement("div");
+        offEl.className = "func-item-offset";
+        offEl.textContent = f.offset;
+
+        item.appendChild(nameEl);
+        item.appendChild(offEl);
+
+        item.addEventListener("click", () => {
+            node?.focusFunctionByOffset(f.offset);
+        });
+
+        funcList.appendChild(item);
+    });
+}
+
+function showFuncPanel(): void {
+    funcPanelSep.style.display = "";
+    funcPanelBtn.style.display = "";
+}
+
+function hideFuncPanel(): void {
+    funcPanelSep.style.display = "none";
+    funcPanelBtn.style.display = "none";
+    funcPanel.classList.remove("open");
+    funcPanelBtn.classList.remove("active");
+}
 
 // ── Hide-unreferenced button ──
 const hideUnrefSep = document.getElementById("hideUnrefSep")       as HTMLElement;
@@ -164,6 +252,7 @@ function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string)
     mainSelSep.style.display    = "none";
     mainSelWrap.style.display   = "none";
     mainSelect.innerHTML        = "";
+    hideFuncPanel();
 
     fileHandle = handle;
 
@@ -188,14 +277,47 @@ function loadDecompiled(decompiled: DecompiledReader, handle: any, name: string)
     // Populate after draw so node map is ready
     requestAnimationFrame(() => {
         populateMainSelect();
+        showFuncPanel();
+        renderFuncList("");
     });
 
     // Start minimap after draw (editor is now initialised)
     minimap?.destroy();
     minimap = null;
+    canvasObserver?.disconnect();
+    canvasObserver = null;
     requestAnimationFrame(() => {
         const info = node?.getEditorInfo();
-        if (info) minimap = new Minimap(minimapCanvas, info.container, info.editor);
+        if (info) {
+            minimap = new Minimap(minimapCanvas, info.container, info.editor);
+
+            // Restore saved pan / zoom position
+            const { x, y, zoom } = decompiled;
+            if (x !== 0 || y !== 0 || zoom !== 1) {
+                const cvs = info.container.querySelector<HTMLElement>('.drawflow');
+                if (cvs) {
+                    cvs.style.transform          = `translate(${x}px, ${y}px) scale(${zoom})`;
+                    info.editor.canvas_x         = x;
+                    info.editor.canvas_y         = y;
+                    info.editor.zoom_last_value  = zoom;
+                }
+            }
+
+            // Track pan / zoom and persist into the decompiled model
+            const inner = info.container.querySelector<HTMLElement>('.drawflow');
+            if (inner) {
+                canvasObserver = new MutationObserver(() => {
+                    if (!currentDecompiled) return;
+                    const ed = info.editor;
+                    currentDecompiled.updatePositionZoom(
+                        ed.canvas_x ?? 0,
+                        ed.canvas_y ?? 0,
+                        ed.zoom_last_value ?? 1
+                    );
+                });
+                canvasObserver.observe(inner, { attributes: true, attributeFilter: ['style'] });
+            }
+        }
     });
 }
 
@@ -254,10 +376,7 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
     const info = node?.getEditorInfo();
     if (!info) return;
 
-    if (e.key === "f" || e.key === "F" || e.key === "Home") {
-        e.preventDefault();
-        fitToView(info.container, info.editor);
-    } else if (e.key === "0") {
+    if (e.key === "0") {
         e.preventDefault();
         resetZoom(info.container, info.editor);
     } else if (e.key === "+" || e.key === "=") {
@@ -282,10 +401,6 @@ document.addEventListener("keydown", (e: KeyboardEvent) => {
 });
 
 // ── Navigation buttons ──────────────────────────────────────────────────────
-document.getElementById("fitViewBtn")!.addEventListener("click", () => {
-    const info = node?.getEditorInfo();
-    if (info) fitToView(info.container, info.editor);
-});
 document.getElementById("zoomInBtn")!.addEventListener("click", () => {
     node?.getEditorInfo()?.editor.zoom_in();
 });

@@ -58,11 +58,21 @@ export class FunctionReader extends Function<InstructionReader> {
 export class DecompiledReader extends Decompiled<ReferenceReader, FunctionReader> {
 
     comment : string;
+    x : number;
+    y : number;
+    zoom: number;
 
-    constructor(comment : string = "") {
+    constructor(comment : string = "", x : number = 0, y : number = 0, zoom: number = 1) {
         super();
         this.comment = comment;
+        this.x = x;
+        this.y = y;
+        this.zoom = zoom;
     }
 
-
+    updatePositionZoom(x : number, y : number, zoom: number) {
+        this.x = x;
+        this.y = y;
+        this.zoom = zoom;
+    }
 }
