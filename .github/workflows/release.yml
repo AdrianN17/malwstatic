@@ -86,5 +86,5 @@ jobs:
           context: .
           push: true
           tags: |
-            adriann17/malstatic:latest
-            adriann17/malstatic:${{ github.ref_name }}
+            adriann17/malwstatic:latest
+            adriann17/malwstatic:${{ github.ref_name }}
